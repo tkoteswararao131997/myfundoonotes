@@ -8,10 +8,12 @@ import com.bridgelabz.Fundoo.Entity.UserEntity;
 
 public interface UserServiceInf {
 	UserEntity registerUser(UserDto dto);
-	boolean getUserByEmail(String email);
+	UserEntity getUserByEmail(String email);
 	List<UserEntity> getall();
 	UserEntity verify(String token);
 	UserEntity getUserById(long userId);
 	boolean isIdPresent(long id);
+	boolean isEmailExists(String email);
+	UserEntity loginUser(String email, String password);
 
 }

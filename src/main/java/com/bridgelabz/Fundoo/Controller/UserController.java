@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.bridgelabz.Fundoo.Dto.UserDto;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
+import com.bridgelabz.Fundoo.Exception.UserExceptions;
 import com.bridgelabz.Fundoo.Response.UserResponse;
 import com.bridgelabz.Fundoo.ServiceImpl.UserServiceImpl;
 
@@ -23,46 +24,49 @@ public class UserController {
 	@Autowired
 	private UserServiceImpl userimpl;
 	
+	/**
+	 * Register User : used to register the user
+	 * @param dto
+	 * @return register response
+	 */
+	@PostMapping("/registeruser")
+	public ResponseEntity<UserResponse> registerUser(@RequestBody UserDto dto)
+	{
+			UserEntity user=userimpl.registerUser(dto);
+			return new ResponseEntity<UserResponse>(new UserResponse("regitration sucess",user,201),HttpStatus.CREATED);		
+	}
+	/**
+	 * Login User:used to login the user
+	 * @param email,password
+	 * @return login response
+	 */
+	
+	@GetMapping("/loginuser/{email}/{password}")
+	public ResponseEntity<UserResponse> loginUser(@PathVariable("email") String email,@PathVariable("password") String password)
+	{
+		UserEntity user=userimpl.loginUser(email,password);
+		return new ResponseEntity<UserResponse>(new UserResponse("login success","welcome "+user.getName(),200),HttpStatus.OK);
+	}
+	/**
+	 * Get All Users: used to display all the users in the table
+	 * @return list of users
+	 */
 	@GetMapping("/getallusers")
 	public ResponseEntity<UserResponse> getAllUsers()
 	{
 		List<UserEntity> users=userimpl.getall();
 		return new ResponseEntity<UserResponse>(new UserResponse("users are",users,200),HttpStatus.OK);
 	}
-	@PostMapping("/registeruser")
-	public ResponseEntity<UserResponse> registerUser(@RequestBody UserDto dto)
-	{
-		
-		if(dto.getEmail()!=null && dto.getPassword()!=null && dto.getName()!=null)
-		{
-			if(userimpl.getUserByEmail(dto.getEmail())==true)
-				return new ResponseEntity<UserResponse>(new UserResponse("email already exists", 406),HttpStatus.NOT_ACCEPTABLE);
-			UserEntity user=userimpl.registerUser(dto);
-			return new ResponseEntity<UserResponse>(new UserResponse("regitration sucess",user,201),HttpStatus.CREATED);
-			
-		}
-		return new ResponseEntity<UserResponse>(new UserResponse("enter valid details",406),HttpStatus.NOT_ACCEPTABLE);
-			
-	}
+	
 	@GetMapping("/verifyemail/{token}")
 	public ResponseEntity<UserResponse> verifyemail(@PathVariable("token") String token)
 	{
-		UserEntity user=userimpl.verify(token);
-		if(user.getEmail()!=null)
-		{
-			return new ResponseEntity<UserResponse>(new UserResponse("email verified", user,200),HttpStatus.OK);
-		}
-		return new ResponseEntity<UserResponse>(new UserResponse("user not found",404),HttpStatus.NOT_FOUND);
+		return new ResponseEntity<UserResponse>(new UserResponse("email verified",userimpl.verify(token),201),HttpStatus.ACCEPTED);
 	}
 	@DeleteMapping("/deleteuser/{userId}")
 	public ResponseEntity<UserResponse> deleteUser(@PathVariable("userId") long userId)
 	{
-		if(userimpl.isIdPresent(userId)==true)
-		{
-			userimpl.deleteUser(userId);
-			return new ResponseEntity<UserResponse>(new UserResponse("user deleted",200),HttpStatus.OK);
-		}
-		return new ResponseEntity<UserResponse>(new UserResponse("no user found",404),HttpStatus.NOT_FOUND);
+			return new ResponseEntity<UserResponse>(new UserResponse("user deleted","welcome"+userimpl.deleteUser(userId),200),HttpStatus.OK);
 	}
 	@GetMapping("/getuserbyid/{userId}")
 	public ResponseEntity<UserResponse> getuserById(@PathVariable("userId") long userId)
@@ -72,7 +76,7 @@ public class UserController {
 		{
 			return new ResponseEntity<UserResponse>(new UserResponse("user details are", user,200),HttpStatus.OK);
 		}
-		return new ResponseEntity<UserResponse>(new UserResponse("user not found",404),HttpStatus.NOT_FOUND);
+		return new ResponseEntity<UserResponse>(new UserResponse("user not found",null,404),HttpStatus.NOT_FOUND);
 	}
 	
 }

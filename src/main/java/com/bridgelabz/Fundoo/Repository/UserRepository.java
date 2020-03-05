@@ -15,17 +15,22 @@ import com.bridgelabz.Fundoo.Entity.UserEntity;
 public interface UserRepository extends JpaRepository<UserEntity,String> {
 	
 	@Query(value="select * from users",nativeQuery=true)
-	List<UserEntity> getAllUsers();
+	Optional<List<UserEntity>> getAllUsers();
 	
-	@Query(value = "select email from users where email=?1",nativeQuery = true)
-	String getUserByEmail(String email);
+	@Query(value = "select * from users where email=?1",nativeQuery = true)
+	Optional<UserEntity> getUserByEmail(String email);
 	
 	@Query(value = "select * from users where userid=?1",nativeQuery = true)
-	UserEntity getUserById(long id);
-	@Modifying
+	Optional<UserEntity> getUserById(long id);
 	
+	@Modifying
 	@Transactional 
 	@Query(value = "delete from users where userid=?1",nativeQuery = true)
-	void deleteUser(@RequestParam long userId);
+	Optional<Integer> deleteUser(@RequestParam long userId);
+	
+	@Query(value = "select email from users where email=?1",nativeQuery = true)
+	String isEmailExists(String email);
+	
+	
 	
 }
