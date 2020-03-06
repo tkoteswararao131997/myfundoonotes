@@ -6,11 +6,13 @@
 //import javax.persistence.GeneratedValue;
 //import javax.persistence.GenerationType;
 //import javax.persistence.Id;
+//import javax.persistence.Table;
 //import javax.validation.constraints.NotNull;
 //
 //import lombok.Data;
 //@Data
 //@Entity
+//@Table(name = "labels")
 //public class LabelEntity {
 //	@Id
 //	@GeneratedValue(strategy = GenerationType.IDENTITY)

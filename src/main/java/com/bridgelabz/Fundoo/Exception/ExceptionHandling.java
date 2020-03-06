@@ -4,13 +4,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.bridgelabz.Fundoo.Response.UserResponse;
+import com.bridgelabz.Fundoo.Response.Response;
 
 @ControllerAdvice
 public class ExceptionHandling{
 	
-	@ExceptionHandler(UserExceptions.class)
-	public ResponseEntity<ExceptionResponse> userCustomExceptions(UserExceptions ex)
+	@ExceptionHandler(CustomException.class)
+	public ResponseEntity<ExceptionResponse> userCustomExceptions(CustomException ex)
 	{
 		ExceptionResponse res=new ExceptionResponse();
 		res.setMessage(ex.getMessage());

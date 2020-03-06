@@ -9,12 +9,12 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class UserResponse {
+public class Response {
 	
 	String message;
 	int status;
 	Object data;
-		public UserResponse(String message,Object user,int status) 
+		public Response(String message,Object user,int status) 
 		{
 		this.message=message;
 		this.status=status;

@@ -14,12 +14,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bridgelabz.Fundoo.Dto.ForgotPwdDto;
 import com.bridgelabz.Fundoo.Dto.LoginDto;
 import com.bridgelabz.Fundoo.Dto.UpdatePwdDto;
 import com.bridgelabz.Fundoo.Dto.UserDto;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
-import com.bridgelabz.Fundoo.Exception.UserExceptions;
-import com.bridgelabz.Fundoo.Response.UserResponse;
+import com.bridgelabz.Fundoo.Exception.CustomException;
+import com.bridgelabz.Fundoo.Response.Response;
 import com.bridgelabz.Fundoo.ServiceImpl.UserServiceImpl;
 
 @RestController
@@ -33,10 +34,10 @@ public class UserController {
 	 * @return register response
 	 */
 	@PostMapping("/registeruser")
-	public ResponseEntity<UserResponse> registerUser(@RequestBody UserDto dto)
+	public ResponseEntity<Response> registerUser(@RequestBody UserDto dto)
 	{
 			UserEntity user=userimpl.registerUser(dto);
-			return new ResponseEntity<UserResponse>(new UserResponse("regitration sucess",user,201),HttpStatus.CREATED);		
+			return new ResponseEntity<Response>(new Response("regitration sucess",user,201),HttpStatus.CREATED);		
 	}
 	/**
 	 * Login User:used to login the user
@@ -45,20 +46,20 @@ public class UserController {
 	 */
 	
 	@PostMapping("/loginuser")
-	public ResponseEntity<UserResponse> loginUser(@RequestBody LoginDto dto)
+	public ResponseEntity<Response> loginUser(@RequestBody LoginDto dto)
 	{
 		UserEntity user=userimpl.loginUser(dto);
-		return new ResponseEntity<UserResponse>(new UserResponse("login success","welcome "+user.getName(),200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("login success","welcome "+user.getName(),200),HttpStatus.OK);
 	}
 	/**
 	 * Get All Users: used to display all the users in the table
 	 * @return list of users
 	 */
 	@GetMapping("/getallusers")
-	public ResponseEntity<UserResponse> getAllUsers()
+	public ResponseEntity<Response> getAllUsers()
 	{
 		List<UserEntity> users=userimpl.getall();
-		return new ResponseEntity<UserResponse>(new UserResponse("users are",users,200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("users are",users,200),HttpStatus.OK);
 	}
 	/**
 	 * Verify Eamil : used to verify the email whether sent link is correct or not
@@ -66,9 +67,9 @@ public class UserController {
 	 * @return verification response
 	 */
 	@GetMapping("/verifyemail/{token}")
-	public ResponseEntity<UserResponse> verifyemail(@PathVariable("token") String token)
+	public ResponseEntity<Response> verifyemail(@PathVariable("token") String token)
 	{
-		return new ResponseEntity<UserResponse>(new UserResponse("email verified",userimpl.verify(token),201),HttpStatus.ACCEPTED);
+		return new ResponseEntity<Response>(new Response("email verified",userimpl.verify(token),201),HttpStatus.ACCEPTED);
 	}
 	/**
 	 * Delete User: used to delete the present user
@@ -76,10 +77,10 @@ public class UserController {
 	 * @return response of deleted or not
 	 */
 	@DeleteMapping("/deleteuser/{userId}")
-	public ResponseEntity<UserResponse> deleteUser(@PathVariable("userId") long userId)
+	public ResponseEntity<Response> deleteUser(@PathVariable("userId") long userId)
 	{
 			userimpl.deleteUser(userId);
-			return new ResponseEntity<UserResponse>(new UserResponse("user deleted",null,200),HttpStatus.OK);
+			return new ResponseEntity<Response>(new Response("user deleted",null,200),HttpStatus.OK);
 	}
 	/**
 	 * Get User By id : get the user based upon user id in the table
@@ -87,14 +88,24 @@ public class UserController {
 	 * @return user
 	 */
 	@GetMapping("/getuserbyid/{userId}")
-	public ResponseEntity<UserResponse> getuserById(@PathVariable("userId") long userId)
+	public ResponseEntity<Response> getuserById(@PathVariable("userId") long userId)
 	{
-		return new ResponseEntity<UserResponse>(new UserResponse("welcome",userimpl.getUserById(userId),200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("welcome",userimpl.getUserById(userId),200),HttpStatus.OK);
+	}
+	/**
+	 * Update Password : set new password for user
+	 * @param pwddto
+	 * @return response od update password
+	 */
+	@PutMapping("/updatepassword")
+	public ResponseEntity<Response> updatePassword(@RequestBody UpdatePwdDto pwddto)
+	{
+		return new ResponseEntity<Response>(new Response("password updated successfully", userimpl.updatepwd(pwddto),200),HttpStatus.OK);
+	}
+	@PutMapping("/forgotpassword")
+	public ResponseEntity<Response> forgotPassword(@RequestBody ForgotPwdDto forgotdto)
+	{
+		return new ResponseEntity<Response>(new Response("password updated and sent to mail successfully","your new pwd is:"+userimpl.forgotPwd(forgotdto),200),HttpStatus.OK);
 	}
 	
-	@PutMapping("/updatepassword")
-	public ResponseEntity<UserResponse> updatePassword(@RequestBody UpdatePwdDto pwddto)
-	{
-		return new ResponseEntity<UserResponse>(new UserResponse("password updated successfully", userimpl.updatepwd(pwddto),200),HttpStatus.OK);
-	}
 }

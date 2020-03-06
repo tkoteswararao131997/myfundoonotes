@@ -1,30 +1,33 @@
 package com.bridgelabz.Fundoo.ServiceImpl;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import com.bridgelabz.Fundoo.Dto.ForgotPwdDto;
 import com.bridgelabz.Fundoo.Dto.LoginDto;
 import com.bridgelabz.Fundoo.Dto.UpdatePwdDto;
 import com.bridgelabz.Fundoo.Dto.UserDto;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
-import com.bridgelabz.Fundoo.Exception.UserExceptions;
+import com.bridgelabz.Fundoo.Exception.CustomException;
 import com.bridgelabz.Fundoo.Repository.UserRepository;
-import com.bridgelabz.Fundoo.Response.UserResponse;
 import com.bridgelabz.Fundoo.Service.UserServiceInf;
 import com.bridgelabz.Fundoo.Utility.JwtOperations;
+
+import lombok.Builder;
 @Service
 public class UserServiceImpl implements UserServiceInf {
 	@Autowired
 	private UserRepository userrepo;
-	private BCryptPasswordEncoder pwdencoder=new BCryptPasswordEncoder();
+	@Autowired
+	private BCryptPasswordEncoder pwdencoder;
+	@Autowired
 	private JwtOperations jwt=new JwtOperations();
+	public static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 	@Override
 	public UserEntity registerUser(UserDto dto)
 	{
@@ -34,46 +37,48 @@ public class UserServiceImpl implements UserServiceInf {
 		entity.setCreateDate(LocalDateTime.now());
 		entity.setUpdateDate(LocalDateTime.now());
 		entity.setPassword(pwdencoder.encode(entity.getPassword()));
-		userrepo.save(entity);
+		UserEntity res =	userrepo.save(entity);
+		log.info(entity.getName()+" registered "+"date:"+entity.getCreateDate());
+		log.info("saved");
 		String body="http://localhost:8080/verifyemail/"+jwt.jwtToken(entity.getUserid());
 		jwt.sendEmail(entity.getEmail(),"verification email",body);
 		return entity;
 	}
 	@Override
 	public UserEntity loginUser(LoginDto dto) {
-		UserEntity user=userrepo.getUserByEmail(dto.getEmail()).orElseThrow(() -> new UserExceptions("login failed",HttpStatus.NOT_FOUND,null));
+		UserEntity user=userrepo.getUserByEmail(dto.getEmail()).orElseThrow(() -> new CustomException("login failed",HttpStatus.NOT_FOUND,null));
 		boolean ispwd=pwdencoder.matches(dto.getPassword(),user.getPassword());
 		if(ispwd==false || user.isVerifyEmail()==false)
-			throw new UserExceptions("login failed",HttpStatus.NOT_FOUND,null);
+			throw new CustomException("login failed",HttpStatus.NOT_FOUND,null);
 		return user;
 		
 	}
 	@Override
 	public List<UserEntity> getall()
 	{
-		return userrepo.getAllUsers().orElseThrow(() -> new UserExceptions("no users present", HttpStatus.NOT_FOUND,null));
+		return userrepo.getAllUsers().orElseThrow(() -> new CustomException("no users present", HttpStatus.NOT_FOUND,null));
 	}
 	@Override
 	public UserEntity getUserByEmail(String email) {
-	UserEntity user=userrepo.getUserByEmail(email).orElseThrow(() -> new UserExceptions("email not exists",HttpStatus.BAD_REQUEST,null));
+	UserEntity user=userrepo.getUserByEmail(email).orElseThrow(() -> new CustomException("email not exists",HttpStatus.BAD_REQUEST,null));
 	return user;
 	}
 	
 	@Override
 	public UserEntity verify(String token) {
 		long id=jwt.parseJWT(token);
-		UserEntity user=userrepo.getUserById(id).orElseThrow(() -> new UserExceptions("user not exists",HttpStatus.BAD_REQUEST,id));
+		UserEntity user=userrepo.getUserById(id).orElseThrow(() -> new CustomException("user not exists",HttpStatus.BAD_REQUEST,id));
 		user.setVerifyEmail(true);
 		userrepo.save(user);
 		return user;
 	}
 	@Override
 	public UserEntity getUserById(long id) {
-		return userrepo.getUserById(id).orElseThrow(() -> new UserExceptions("user not exists",HttpStatus.BAD_REQUEST,id));
+		return userrepo.getUserById(id).orElseThrow(() -> new CustomException("user not exists",HttpStatus.BAD_REQUEST,id));
 	}
 	@Override
 	public boolean isIdPresent(long id) {
-		UserEntity user=userrepo.getUserById(id).orElseThrow(() -> new UserExceptions("user not exists",HttpStatus.BAD_REQUEST,id));
+		UserEntity user=userrepo.getUserById(id).orElseThrow(() -> new CustomException("user not exists",HttpStatus.BAD_REQUEST,id));
 		if(user.getEmail()!=null)
 		return true;
 		return false;
@@ -87,7 +92,7 @@ public class UserServiceImpl implements UserServiceInf {
 	public boolean isEmailExists(String email) {
 		boolean b=userrepo.isEmailExists(email).isPresent();
 		if(b==true)
-			throw new UserExceptions("email already exists",HttpStatus.NOT_ACCEPTABLE,null);
+			throw new CustomException("email already exists",HttpStatus.NOT_ACCEPTABLE,null);
 		return false;
 	}
 	@Override
@@ -100,7 +105,21 @@ public class UserServiceImpl implements UserServiceInf {
 			return user;
 		}
 		else {
-			throw new UserExceptions("password not matching",HttpStatus.NOT_ACCEPTABLE,null);
+			throw new CustomException("password not matching",HttpStatus.NOT_ACCEPTABLE,null);
+		}
+	}
+	public String forgotPwd(ForgotPwdDto forgotdto) {
+		UserEntity user=getUserByEmail(forgotdto.getEmail());
+		if(user.getUserid()==forgotdto.getUserid() && forgotdto.getNewpassword().equals(forgotdto.getConformpassword()))
+		{
+			user.setPassword(pwdencoder.encode(forgotdto.getConformpassword()));
+			userrepo.save(user);
+			jwt.sendEmail(user.getEmail(),"your new password",forgotdto.getConformpassword());
+			return forgotdto.getConformpassword();
+		}
+		else
+		{
+			throw new CustomException("enter valid details",HttpStatus.NOT_ACCEPTABLE,null);
 		}
 	}
 	

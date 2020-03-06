@@ -4,5 +4,5 @@
 //import com.bridgelabz.Fundoo.Entity.LabelEntity;
 //
 //public interface LabelServiceInf {
-//	LabelEntity addLabel(LabelDto dto);
+//	String createLabel(LabelDto labeldto, String token);
 //}
