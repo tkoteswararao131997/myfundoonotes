@@ -10,10 +10,12 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bridgelabz.Fundoo.Dto.LoginDto;
+import com.bridgelabz.Fundoo.Dto.UpdatePwdDto;
 import com.bridgelabz.Fundoo.Dto.UserDto;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
 import com.bridgelabz.Fundoo.Exception.UserExceptions;
@@ -68,21 +70,31 @@ public class UserController {
 	{
 		return new ResponseEntity<UserResponse>(new UserResponse("email verified",userimpl.verify(token),201),HttpStatus.ACCEPTED);
 	}
+	/**
+	 * Delete User: used to delete the present user
+	 * @param userId
+	 * @return response of deleted or not
+	 */
 	@DeleteMapping("/deleteuser/{userId}")
 	public ResponseEntity<UserResponse> deleteUser(@PathVariable("userId") long userId)
 	{
 			userimpl.deleteUser(userId);
 			return new ResponseEntity<UserResponse>(new UserResponse("user deleted",null,200),HttpStatus.OK);
 	}
+	/**
+	 * Get User By id : get the user based upon user id in the table
+	 * @param userId
+	 * @return user
+	 */
 	@GetMapping("/getuserbyid/{userId}")
 	public ResponseEntity<UserResponse> getuserById(@PathVariable("userId") long userId)
 	{
-		UserEntity user=userimpl.getUserById(userId);
-		if(user.getEmail()!=null)
-		{
-			return new ResponseEntity<UserResponse>(new UserResponse("user details are", user,200),HttpStatus.OK);
-		}
-		return new ResponseEntity<UserResponse>(new UserResponse("user not found",null,404),HttpStatus.NOT_FOUND);
+		return new ResponseEntity<UserResponse>(new UserResponse("welcome",userimpl.getUserById(userId),200),HttpStatus.OK);
 	}
 	
+	@PutMapping("/updatepassword")
+	public ResponseEntity<UserResponse> updatePassword(@RequestBody UpdatePwdDto pwddto)
+	{
+		return new ResponseEntity<UserResponse>(new UserResponse("password updated successfully", userimpl.updatepwd(pwddto),200),HttpStatus.OK);
+	}
 }

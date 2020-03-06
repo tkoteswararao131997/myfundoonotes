@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.bridgelabz.Fundoo.Dto.LoginDto;
+import com.bridgelabz.Fundoo.Dto.UpdatePwdDto;
 import com.bridgelabz.Fundoo.Dto.UserDto;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
 
@@ -16,5 +17,6 @@ public interface UserServiceInf {
 	boolean isIdPresent(long id);
 	boolean isEmailExists(String email);
 	UserEntity loginUser(LoginDto dto);
+	UserEntity updatepwd(UpdatePwdDto pwddto);
 
 }

@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.bridgelabz.Fundoo.Dto.LoginDto;
+import com.bridgelabz.Fundoo.Dto.UpdatePwdDto;
 import com.bridgelabz.Fundoo.Dto.UserDto;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
 import com.bridgelabz.Fundoo.Exception.UserExceptions;
@@ -27,9 +28,7 @@ public class UserServiceImpl implements UserServiceInf {
 	@Override
 	public UserEntity registerUser(UserDto dto)
 	{
-		boolean b=userrepo.getUserByEmail(dto.getEmail()).isPresent();
-		if(b==true)
-			throw new UserExceptions("email already exists",HttpStatus.NOT_ACCEPTABLE,null);
+		isEmailExists(dto.getEmail());
 		UserEntity entity=new UserEntity();
 		BeanUtils.copyProperties(dto, entity);
 		entity.setCreateDate(LocalDateTime.now());
@@ -86,10 +85,23 @@ public class UserServiceImpl implements UserServiceInf {
 	}
 	@Override
 	public boolean isEmailExists(String email) {
-			String isemail=userrepo.isEmailExists(email);
-			if(isemail==null)
-				return false;
-			return true;
+		boolean b=userrepo.isEmailExists(email).isPresent();
+		if(b==true)
+			throw new UserExceptions("email already exists",HttpStatus.NOT_ACCEPTABLE,null);
+		return false;
+	}
+	@Override
+	public UserEntity updatepwd(UpdatePwdDto pwddto) {
+		UserEntity user=getUserByEmail(pwddto.getEmail());
+		if((pwddto.getNewpassword().equals(pwddto.getConformpassword()) && (pwdencoder.matches(pwddto.getOldpassword(),user.getPassword()))))
+		{
+			user.setPassword(pwdencoder.encode(pwddto.getConformpassword()));
+			userrepo.save(user);
+			return user;
+		}
+		else {
+			throw new UserExceptions("password not matching",HttpStatus.NOT_ACCEPTABLE,null);
+		}
 	}
 	
 }

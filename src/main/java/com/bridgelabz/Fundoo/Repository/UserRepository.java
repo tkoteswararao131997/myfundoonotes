@@ -29,7 +29,7 @@ public interface UserRepository extends JpaRepository<UserEntity,String> {
 	void deleteUser(@RequestParam long userId);
 	
 	@Query(value = "select email from users where email=?1",nativeQuery = true)
-	String isEmailExists(String email);
+	Optional<String> isEmailExists(String email);
 	
 	
 	
