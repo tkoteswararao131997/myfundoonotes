@@ -3,6 +3,7 @@ package com.bridgelabz.Fundoo.Service;
 import java.util.List;
 import java.util.Optional;
 
+import com.bridgelabz.Fundoo.Dto.LoginDto;
 import com.bridgelabz.Fundoo.Dto.UserDto;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
 
@@ -14,6 +15,6 @@ public interface UserServiceInf {
 	UserEntity getUserById(long userId);
 	boolean isIdPresent(long id);
 	boolean isEmailExists(String email);
-	UserEntity loginUser(String email, String password);
+	UserEntity loginUser(LoginDto dto);
 
 }

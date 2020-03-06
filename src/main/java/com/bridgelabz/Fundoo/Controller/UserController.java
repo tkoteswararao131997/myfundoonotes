@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.bridgelabz.Fundoo.Dto.LoginDto;
 import com.bridgelabz.Fundoo.Dto.UserDto;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
 import com.bridgelabz.Fundoo.Exception.UserExceptions;
@@ -41,10 +42,10 @@ public class UserController {
 	 * @return login response
 	 */
 	
-	@GetMapping("/loginuser/{email}/{password}")
-	public ResponseEntity<UserResponse> loginUser(@PathVariable("email") String email,@PathVariable("password") String password)
+	@PostMapping("/loginuser")
+	public ResponseEntity<UserResponse> loginUser(@RequestBody LoginDto dto)
 	{
-		UserEntity user=userimpl.loginUser(email,password);
+		UserEntity user=userimpl.loginUser(dto);
 		return new ResponseEntity<UserResponse>(new UserResponse("login success","welcome "+user.getName(),200),HttpStatus.OK);
 	}
 	/**
@@ -57,7 +58,11 @@ public class UserController {
 		List<UserEntity> users=userimpl.getall();
 		return new ResponseEntity<UserResponse>(new UserResponse("users are",users,200),HttpStatus.OK);
 	}
-	
+	/**
+	 * Verify Eamil : used to verify the email whether sent link is correct or not
+	 * @param token
+	 * @return verification response
+	 */
 	@GetMapping("/verifyemail/{token}")
 	public ResponseEntity<UserResponse> verifyemail(@PathVariable("token") String token)
 	{
@@ -66,7 +71,8 @@ public class UserController {
 	@DeleteMapping("/deleteuser/{userId}")
 	public ResponseEntity<UserResponse> deleteUser(@PathVariable("userId") long userId)
 	{
-			return new ResponseEntity<UserResponse>(new UserResponse("user deleted","welcome"+userimpl.deleteUser(userId),200),HttpStatus.OK);
+			userimpl.deleteUser(userId);
+			return new ResponseEntity<UserResponse>(new UserResponse("user deleted",null,200),HttpStatus.OK);
 	}
 	@GetMapping("/getuserbyid/{userId}")
 	public ResponseEntity<UserResponse> getuserById(@PathVariable("userId") long userId)

@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.bridgelabz.Fundoo.Dto.LoginDto;
 import com.bridgelabz.Fundoo.Dto.UserDto;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
 import com.bridgelabz.Fundoo.Exception.UserExceptions;
@@ -20,6 +22,7 @@ import com.bridgelabz.Fundoo.Utility.JwtOperations;
 public class UserServiceImpl implements UserServiceInf {
 	@Autowired
 	private UserRepository userrepo;
+	private BCryptPasswordEncoder pwdencoder=new BCryptPasswordEncoder();
 	private JwtOperations jwt=new JwtOperations();
 	@Override
 	public UserEntity registerUser(UserDto dto)
@@ -31,16 +34,19 @@ public class UserServiceImpl implements UserServiceInf {
 		BeanUtils.copyProperties(dto, entity);
 		entity.setCreateDate(LocalDateTime.now());
 		entity.setUpdateDate(LocalDateTime.now());
+		entity.setPassword(pwdencoder.encode(entity.getPassword()));
 		userrepo.save(entity);
 		String body="http://localhost:8080/verifyemail/"+jwt.jwtToken(entity.getUserid());
 		jwt.sendEmail(entity.getEmail(),"verification email",body);
 		return entity;
 	}
 	@Override
-	public UserEntity loginUser(String email, String password) {
-		return userrepo.getUserByEmail(email).orElseThrow(() -> new UserExceptions("login failed",HttpStatus.NOT_FOUND,null));
-		
-		
+	public UserEntity loginUser(LoginDto dto) {
+		UserEntity user=userrepo.getUserByEmail(dto.getEmail()).orElseThrow(() -> new UserExceptions("login failed",HttpStatus.NOT_FOUND,null));
+		boolean ispwd=pwdencoder.matches(dto.getPassword(),user.getPassword());
+		if(ispwd==false || user.isVerifyEmail()==false)
+			throw new UserExceptions("login failed",HttpStatus.NOT_FOUND,null);
+		return user;
 		
 	}
 	@Override
@@ -64,10 +70,7 @@ public class UserServiceImpl implements UserServiceInf {
 	}
 	@Override
 	public UserEntity getUserById(long id) {
-		UserEntity user=userrepo.getUserById(id).orElseThrow(() -> new UserExceptions("user not exists",HttpStatus.BAD_REQUEST,id));
-		if(user.getEmail()!=null)
-		return user;
-		return null;
+		return userrepo.getUserById(id).orElseThrow(() -> new UserExceptions("user not exists",HttpStatus.BAD_REQUEST,id));
 	}
 	@Override
 	public boolean isIdPresent(long id) {
@@ -76,8 +79,9 @@ public class UserServiceImpl implements UserServiceInf {
 		return true;
 		return false;
 	}
-	public Integer deleteUser(long userId) {
-		return userrepo.deleteUser(userId).orElseThrow(() -> new UserExceptions("id not exists",HttpStatus.NOT_FOUND,userId));
+	public void deleteUser(long userId) {
+		getUserById(userId);
+		userrepo.deleteUser(userId);
 		
 	}
 	@Override

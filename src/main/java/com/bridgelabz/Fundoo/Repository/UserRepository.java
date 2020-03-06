@@ -26,7 +26,7 @@ public interface UserRepository extends JpaRepository<UserEntity,String> {
 	@Modifying
 	@Transactional 
 	@Query(value = "delete from users where userid=?1",nativeQuery = true)
-	Optional<Integer> deleteUser(@RequestParam long userId);
+	void deleteUser(@RequestParam long userId);
 	
 	@Query(value = "select email from users where email=?1",nativeQuery = true)
 	String isEmailExists(String email);
