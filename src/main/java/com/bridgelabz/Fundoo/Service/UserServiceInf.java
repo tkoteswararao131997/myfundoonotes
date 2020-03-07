@@ -16,7 +16,7 @@ public interface UserServiceInf {
 	UserEntity getUserById(long userId);
 	boolean isIdPresent(long id);
 	boolean isEmailExists(String email);
-	UserEntity loginUser(LoginDto dto);
+	String loginUser(LoginDto dto);
 	UserEntity updatepwd(UpdatePwdDto pwddto);
 
 }

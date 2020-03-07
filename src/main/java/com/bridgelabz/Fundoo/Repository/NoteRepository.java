@@ -27,4 +27,17 @@ public interface NoteRepository extends JpaRepository<NoteEntity, String> {
 	@Transactional
 	@Query(value = "delete from notes where note_id=?1 and userid=?2",nativeQuery =true)
 	 void deleteNoteById(long noteid,long userid);
+	
+	
+	@Modifying
+	@Transactional
+	@Query(value = "delete from notes where userid=?1",nativeQuery =true)
+	 void deleteAllNotes(long userid);
+	
+	@Query(value = "select * from notes where userid=?1 and is_pinned=true",nativeQuery = true)
+	Optional<List<NoteEntity>> getAllPinNotes(long userid);
+
+	@Query(value = "select * from notes where userid=?1 and is_archieve=true",nativeQuery = true)
+	Optional<List<NoteEntity>> getAllArchieveNotes(long userid);
+	
 }

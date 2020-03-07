@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.bridgelabz.Fundoo.Entity.LabelEntity;
 import com.bridgelabz.Fundoo.Entity.NoteEntity;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
 import com.bridgelabz.Fundoo.Utility.JwtOperations;
@@ -28,5 +29,10 @@ public class AppConfig {
 	public NoteEntity noteentity()
 	{
 		return new NoteEntity();
+	}
+	@Bean
+	public LabelEntity labelentity()
+	{
+		return new LabelEntity();
 	}
 }

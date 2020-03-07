@@ -1,7 +1,6 @@
 package com.bridgelabz.Fundoo.Controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,7 +18,6 @@ import com.bridgelabz.Fundoo.Dto.LoginDto;
 import com.bridgelabz.Fundoo.Dto.UpdatePwdDto;
 import com.bridgelabz.Fundoo.Dto.UserDto;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
-import com.bridgelabz.Fundoo.Exception.CustomException;
 import com.bridgelabz.Fundoo.Response.Response;
 import com.bridgelabz.Fundoo.ServiceImpl.UserServiceImpl;
 
@@ -48,8 +46,8 @@ public class UserController {
 	@PostMapping("/loginuser")
 	public ResponseEntity<Response> loginUser(@RequestBody LoginDto dto)
 	{
-		UserEntity user=userimpl.loginUser(dto);
-		return new ResponseEntity<Response>(new Response("login success","welcome "+user.getName(),200),HttpStatus.OK);
+		String token=userimpl.loginUser(dto);
+		return new ResponseEntity<Response>(new Response("login success","token is:"+token,200),HttpStatus.OK);
 	}
 	/**
 	 * Get All Users: used to display all the users in the table

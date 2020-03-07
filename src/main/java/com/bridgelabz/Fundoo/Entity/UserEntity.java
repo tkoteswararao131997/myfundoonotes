@@ -10,11 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
-import com.sun.istack.NotNull;
-
 import lombok.Data;
 @Data
 @Entity
@@ -31,11 +26,11 @@ public class UserEntity{
 	private LocalDateTime updateDate;
 	private boolean isVerifyEmail=false;
 	
-//	@OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-//	@JoinColumn(name="userid",referencedColumnName = "userid")
-//	private List<LabelEntity> labels;
+	@OneToMany(cascade= {CascadeType.ALL,CascadeType.REMOVE},fetch = FetchType.LAZY)
+	@JoinColumn(name="userid")
+	private List<NoteEntity> notes;
 	
 	@OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
-	@JoinColumn(name="userid",referencedColumnName = "userid")
-	private List<NoteEntity> notes;
+	@JoinColumn(name="userid")
+	private List<LabelEntity> labels;
 }

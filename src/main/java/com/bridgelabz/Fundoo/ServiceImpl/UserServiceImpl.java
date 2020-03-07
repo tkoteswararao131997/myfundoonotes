@@ -18,7 +18,6 @@ import com.bridgelabz.Fundoo.Repository.UserRepository;
 import com.bridgelabz.Fundoo.Service.UserServiceInf;
 import com.bridgelabz.Fundoo.Utility.JwtOperations;
 
-import lombok.Builder;
 @Service
 public class UserServiceImpl implements UserServiceInf {
 	@Autowired
@@ -37,7 +36,7 @@ public class UserServiceImpl implements UserServiceInf {
 		entity.setCreateDate(LocalDateTime.now());
 		entity.setUpdateDate(LocalDateTime.now());
 		entity.setPassword(pwdencoder.encode(entity.getPassword()));
-		UserEntity res =	userrepo.save(entity);
+		UserEntity res =userrepo.save(entity);
 		log.info(entity.getName()+" registered "+"date:"+entity.getCreateDate());
 		log.info("saved");
 		String body="http://localhost:8080/verifyemail/"+jwt.jwtToken(entity.getUserid());
@@ -45,12 +44,13 @@ public class UserServiceImpl implements UserServiceInf {
 		return entity;
 	}
 	@Override
-	public UserEntity loginUser(LoginDto dto) {
+	public String loginUser(LoginDto dto) {
 		UserEntity user=userrepo.getUserByEmail(dto.getEmail()).orElseThrow(() -> new CustomException("login failed",HttpStatus.NOT_FOUND,null));
 		boolean ispwd=pwdencoder.matches(dto.getPassword(),user.getPassword());
 		if(ispwd==false || user.isVerifyEmail()==false)
 			throw new CustomException("login failed",HttpStatus.NOT_FOUND,null);
-		return user;
+		String token=jwt.jwtToken(user.getUserid());
+		return token;
 		
 	}
 	@Override
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserServiceInf {
 	@Override
 	public UserEntity verify(String token) {
 		long id=jwt.parseJWT(token);
-		UserEntity user=userrepo.getUserById(id).orElseThrow(() -> new CustomException("user not exists",HttpStatus.BAD_REQUEST,id));
+		UserEntity user=userrepo.isIdExists(id).orElseThrow(() -> new CustomException("user not exists",HttpStatus.BAD_REQUEST,id));
 		user.setVerifyEmail(true);
 		userrepo.save(user);
 		return user;
@@ -84,14 +84,13 @@ public class UserServiceImpl implements UserServiceInf {
 		return false;
 	}
 	public void deleteUser(long userId) {
-		getUserById(userId);
-		userrepo.deleteUser(userId);
+		UserEntity user=getUserById(userId);
+		userrepo.delete(user);
 		
 	}
 	@Override
 	public boolean isEmailExists(String email) {
-		boolean b=userrepo.isEmailExists(email).isPresent();
-		if(b==true)
+		if(userrepo.isEmailExists(email).isPresent())
 			throw new CustomException("email already exists",HttpStatus.NOT_ACCEPTABLE,null);
 		return false;
 	}
