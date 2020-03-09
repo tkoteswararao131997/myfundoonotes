@@ -38,7 +38,6 @@ public class UserServiceImpl implements UserServiceInf {
 		entity.setPassword(pwdencoder.encode(entity.getPassword()));
 		UserEntity res =userrepo.save(entity);
 		log.info(entity.getName()+" registered "+"date:"+entity.getCreateDate());
-		log.info("saved");
 		String body="http://localhost:8080/verifyemail/"+jwt.jwtToken(entity.getUserid());
 		jwt.sendEmail(entity.getEmail(),"verification email",body);
 		return entity;

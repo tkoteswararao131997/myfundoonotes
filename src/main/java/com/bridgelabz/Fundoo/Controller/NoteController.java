@@ -126,7 +126,7 @@ public class NoteController {
 	public ResponseEntity<Response> isTrashed(@PathVariable("token") String token,@PathVariable("noteid") long noteid)
 	{
 		NoteEntity note=noteimpl.isTrashed(token,noteid);
-		return new ResponseEntity<Response>(new Response(note.getTitle()+" was archieved",note,200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response(note.getTitle()+" was trashed",note,200),HttpStatus.OK);
 	}
 	/**
 	 * Remind Me : used to set reminder

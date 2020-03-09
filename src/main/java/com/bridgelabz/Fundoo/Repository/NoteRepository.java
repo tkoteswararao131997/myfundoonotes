@@ -37,7 +37,7 @@ public interface NoteRepository extends JpaRepository<NoteEntity, String> {
 	@Query(value = "select * from notes where userid=?1 and is_pinned=true",nativeQuery = true)
 	Optional<List<NoteEntity>> getAllPinNotes(long userid);
 
-	@Query(value = "select * from notes where userid=?1 and is_archieve=true",nativeQuery = true)
-	Optional<List<NoteEntity>> getAllArchieveNotes(long userid);
+//	@Query(value = "select * from notes where userid=?1 and is_archieve=true",nativeQuery = true)
+//	Optional<List<NoteEntity>> getAllArchieveNotes(long userid);
 	
 }

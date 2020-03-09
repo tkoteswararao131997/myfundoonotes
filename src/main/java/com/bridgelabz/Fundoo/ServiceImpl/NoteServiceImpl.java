@@ -3,6 +3,8 @@ package com.bridgelabz.Fundoo.ServiceImpl;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.BeanUtils;
@@ -107,10 +109,13 @@ public class NoteServiceImpl implements NoteServiceInf {
 		NoteEntity note=getNoteById(noteid, userid);
 		note.setPinned(false);
 		if(note.isArchieve()==false)
+		{
 			note.setArchieve(true);
+		}
 		else
+		{
 			note.setArchieve(false);
-		note.setArchieve(false);
+		}
 		note.setTrashed(false);
 		noterepo.save(note);
 		return note;
@@ -140,15 +145,16 @@ public class NoteServiceImpl implements NoteServiceInf {
 	}
 	public List<NoteEntity> getAllPinNotes(String token) {
 		long id=jwt.parseJWT(token);
-		userentity=userimpl.getUserById(id);
-		List<NoteEntity> notes=noterepo.getAllPinNotes(id).orElseThrow(() -> new CustomException("no pinned-notes in the list",HttpStatus.NOT_FOUND,null));
-		return notes;
+		List<NoteEntity> notes=noterepo.getAllNotes(id).orElseThrow();
+		List<NoteEntity> pinNotes=notes.stream().filter(archieve -> archieve.isPinned()==true).collect(Collectors.toList());		
+		return pinNotes;
 	}
 	public List<NoteEntity> getAllArchieveNotes(String token) {
 		long id=jwt.parseJWT(token);
 		userentity=userimpl.getUserById(id);
-		List<NoteEntity> notes=noterepo.getAllArchieveNotes(id).orElseThrow(() -> new CustomException("no archieve-notes in the list",HttpStatus.NOT_FOUND,null));
-		return notes;
+		List<NoteEntity> notes=noterepo.getAllNotes(id).orElseThrow();
+		List<NoteEntity> archieveNotes=notes.stream().filter(archieve -> archieve.isArchieve()==true).collect(Collectors.toList());		
+		return archieveNotes;
 	}
 	
 
