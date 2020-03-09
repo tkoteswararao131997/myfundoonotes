@@ -1,12 +1,8 @@
 package com.bridgelabz.Fundoo.ServiceImpl;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -63,8 +59,8 @@ public class NoteServiceImpl implements NoteServiceInf {
 	public void deleteNoteById(String token, long noteid) {
 		long userid= jwt.parseJWT(token);
 		userimpl.getUserById(userid);
-		getNoteById(noteid, userid);
-		noterepo.deleteNoteById(noteid,userid);
+		NoteEntity note=getNoteById(noteid, userid);
+		noterepo.delete(note);
 	}
 	
 	public NoteEntity getNoteById(long noteid,long userid)

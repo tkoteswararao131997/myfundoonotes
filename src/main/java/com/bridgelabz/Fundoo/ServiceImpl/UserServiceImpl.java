@@ -83,9 +83,8 @@ public class UserServiceImpl implements UserServiceInf {
 		return false;
 	}
 	public void deleteUser(long userId) {
-		UserEntity user=getUserById(userId);
-		userrepo.delete(user);
-		
+			UserEntity user=getUserById(userId);
+			userrepo.delete(user);
 	}
 	@Override
 	public boolean isEmailExists(String email) {
