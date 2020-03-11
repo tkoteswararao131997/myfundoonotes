@@ -39,7 +39,7 @@ public class NoteEntity {
 	
 	@OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH},fetch = FetchType.LAZY)
 	@JoinColumn(columnDefinition = "noteId",referencedColumnName = "noteId")
-	private List<CollaboratorEntity> colaborators;
+	private List<NoteEntity> colaborators;
 	
 
 }
