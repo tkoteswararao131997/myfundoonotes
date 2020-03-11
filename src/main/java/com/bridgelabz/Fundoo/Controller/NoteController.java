@@ -159,5 +159,29 @@ public class NoteController {
 	{
 		return new ResponseEntity<Response>(new Response("your notes are",noteimpl.getAllArchieveNotes(token),200),HttpStatus.OK);
 	}
+	/**
+	 * Get Note By Id : used to get a note based upon id value
+	 * @param token
+	 * @param noteid
+	 * @return single note response
+	 */
+	@GetMapping("/getnotebyid/{token}/{noteid}")
+	public ResponseEntity<Response> getNoteById(@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	{
+		return new ResponseEntity<Response>(new Response("your note is",noteimpl.getNoteById(token,noteid),200),HttpStatus.OK);
+	}
+	
+	@PutMapping("/updateremindeme/{token}/{noteid}")
+	public ResponseEntity<Response> updateRemindMe(@RequestBody LocalDateTime remindme,@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	{
+		return new ResponseEntity<Response>(new Response("remindme is updated",noteimpl.UpdateRemindMe(remindme,token,noteid),200),HttpStatus.OK);
+	}
+	
+	@DeleteMapping("/deleteremindeme/{token}/{noteid}")
+	public ResponseEntity<Response> delteRemindMe(@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	{
+		noteimpl.deleteRemindMe(token,noteid);
+		return new ResponseEntity<Response>(new Response("remindme is deleted",null,200),HttpStatus.OK);
+	}
 			
 }

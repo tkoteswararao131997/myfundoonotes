@@ -1,5 +1,6 @@
 package com.bridgelabz.Fundoo.ServiceImpl;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -84,12 +85,24 @@ public class LabelServiceImpl implements LabelServiceInf
 		long userid=jwt.parseJWT(token);
 		UserEntity user=userimpl.getUserById(userid);
 		LabelEntity label=getLabelById(labelid);
+		labelrepo.setcheck();
 		labelrepo.delete(label);
+		
 	}
 	@Override
 	public List<LabelEntity> getAllLabels(String token) {
 		
 		return labelrepo.getAllLabels(jwt.parseJWT(token)).orElseThrow(() -> new CustomException("no labels found",HttpStatus.NOT_FOUND,null));
+	}
+	public void deleteLabelFromNote(String token, long labelid, long noteid) {
+		long userid=jwt.parseJWT(token);
+		UserEntity user=userimpl.getUserById(userid);
+		NoteEntity note=noteimpl.getNoteById(noteid, userid);
+		LabelEntity label=labelrepo.getLabelById(labelid).orElseThrow(() -> new CustomException("no label is present",HttpStatus.NOT_FOUND,null));
+		int id=labelrepo.islabelwithnote(label.getLabelId(),note.getNoteId()).orElseThrow(() -> new CustomException("label not present",HttpStatus.NOT_FOUND,null));
+		System.out.println(id);
+		note.getLabels().remove(label);
+		noterepo.save(note);
 	}
 	
 

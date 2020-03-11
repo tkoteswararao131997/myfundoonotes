@@ -26,11 +26,11 @@ public class UserEntity{
 	private LocalDateTime updateDate;
 	private boolean isVerifyEmail=false;
 	
-	@OneToMany(cascade= {CascadeType.ALL,CascadeType.REMOVE},fetch = FetchType.LAZY)
+	@OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH},fetch = FetchType.LAZY)
 	@JoinColumn(name="userid")
 	private List<NoteEntity> notes;
 	
-	@OneToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+	@OneToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY)
 	@JoinColumn(name="userid")
 	private List<LabelEntity> labels;
 }

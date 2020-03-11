@@ -74,5 +74,10 @@ public class LabelController {
 		return new ResponseEntity<Response>(new Response("your labels are",labelimpl.getAllLabels(token),200),HttpStatus.OK);
 	}
 	
-	
+	@DeleteMapping("/deletelabelfromnote/{token}/{labelid}/{noteid}")
+	public ResponseEntity<Response> deleteLabelFromNOte(@PathVariable("token") String token,long labelid,@PathVariable("noteid") long noteid)
+	{
+		labelimpl.deleteLabelFromNote(token,labelid,noteid);
+		return new ResponseEntity<Response>(new Response("label deleted from note",null,200),HttpStatus.OK);
+	}
 }

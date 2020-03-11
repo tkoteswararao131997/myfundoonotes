@@ -41,7 +41,7 @@ public class NoteServiceImpl implements NoteServiceInf {
 		noteentity.setArchieve(false);
 		noteentity.setCreateDate(LocalDateTime.now());
 		noteentity.setUpdateDate(LocalDateTime.now());
-		noteentity.setReminde(LocalDateTime.now());
+		noteentity.setReminde(null);
 		noteentity.setPinned(false);
 		noteentity.setTrashed(false);
 		userentity.getNotes().add(noteentity);
@@ -151,6 +151,25 @@ public class NoteServiceImpl implements NoteServiceInf {
 		List<NoteEntity> notes=noterepo.getAllNotes(id).orElseThrow();
 		List<NoteEntity> archieveNotes=notes.stream().filter(archieve -> archieve.isArchieve()==true).collect(Collectors.toList());		
 		return archieveNotes;
+	}
+	public NoteEntity getNoteById(String token, long noteid) {
+		long userid=jwt.parseJWT(token);
+		return noterepo.getNoteById(noteid, userid).orElseThrow(() -> new CustomException("no notes in the list",HttpStatus.NOT_FOUND,null));
+	}
+	public NoteEntity UpdateRemindMe(LocalDateTime remindme, String token, long noteid) {
+		long userid=jwt.parseJWT(token);
+		userentity=userimpl.getUserById(userid);
+		NoteEntity note=getNoteById(noteid, userid);
+		note.setReminde(remindme);
+		noterepo.save(note);
+		return note;
+	}
+	public void deleteRemindMe(String token, long noteid) {
+		long userid=jwt.parseJWT(token);
+		userentity=userimpl.getUserById(userid);
+		NoteEntity note=getNoteById(noteid, userid);
+		note.setReminde(null);
+		noterepo.save(note);
 	}
 	
 
