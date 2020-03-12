@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.Data;
@@ -33,4 +34,7 @@ public class UserEntity{
 	@OneToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY)
 	@JoinColumn(name="userid")
 	private List<LabelEntity> labels;
+	
+//	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH},fetch = FetchType.LAZY,mappedBy = "collaborators")
+//	private List<NoteEntity> collaboratorNotes;
 }

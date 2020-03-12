@@ -37,7 +37,7 @@ public class NoteEntity {
 	@ManyToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY)
 	private List<LabelEntity> labels;
 	
-	@OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH},fetch = FetchType.LAZY)
+	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH},fetch = FetchType.LAZY)
 	private List<UserEntity> collaborators;
 	
 

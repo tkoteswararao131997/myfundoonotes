@@ -30,8 +30,12 @@ public class CollaboratorServiceImpl implements CollaboratorService {
 	
 	@Autowired
 	private NoteRepository noterepo;
+	@Autowired
+	private CollaboratorRepository collabrepo;
 	@Override
 	public NoteEntity addColabToNote(CollaboratorDto colabDto, String token, long noteid) {
+//		if(collabrepo.isColabExists(colabDto.getColabEmail()).isPresent())
+//			throw new CustomException("collaborator already exists",HttpStatus.BAD_REQUEST,null);
 		long userid=jwt.parseJWT(token);
 		UserEntity user=userimpl.getUserById(userid);
 		NoteEntity note=noteimpl.getNoteById(noteid, userid);
@@ -43,14 +47,23 @@ public class CollaboratorServiceImpl implements CollaboratorService {
 
 	@Override
 	public void deleteColabFromNote(CollaboratorDto colabdto, String token, long noteid) {
-		// TODO Auto-generated method stub
-		
+		long userid=jwt.parseJWT(token);
+		UserEntity user=userimpl.getUserById(userid);
+		NoteEntity note=noteimpl.getNoteById(noteid, userid);
+		UserEntity colabuser=userimpl.getUserByEmail(colabdto.getColabEmail());
+		if(collabrepo.isColabInNote(colabuser.getUserid(),note.getNoteId()).isEmpty())
+			throw new CustomException("collaborator not present",HttpStatus.NOT_FOUND,null);
+		note.getCollaborators().remove(colabuser);
+		noterepo.save(note);	
 	}
 
 	@Override
 	public List<UserEntity> getAllColabs(String token, long noteid) {
-		// TODO Auto-generated method stub
-		return null;
+		long userid=jwt.parseJWT(token);
+		UserEntity user=userimpl.getUserById(userid);
+		NoteEntity note=noteimpl.getNoteById(noteid, userid);
+		List<UserEntity> colabusers=note.getCollaborators();
+		return colabusers;
 	}
 
 }

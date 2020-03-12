@@ -25,4 +25,17 @@ public class CollaboratorController {
 	{
 		return new ResponseEntity<Response>(new Response("collaborator added",colabimpl.addColabToNote(colabemail, token, noteid),201),HttpStatus.CREATED);
 	}
+	
+	@DeleteMapping("/deletecollaborator/{token}/{noteid}")
+	public ResponseEntity<Response> deleteCollaborator(@RequestBody CollaboratorDto colabemail,@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	{
+		colabimpl.deleteColabFromNote(colabemail, token, noteid);
+		return new ResponseEntity<Response>(new Response("collaborator deleted",null,200),HttpStatus.OK);
+	}
+	
+	@GetMapping("/getallcollaborators/{token}/{noteid}")
+	public ResponseEntity<Response> getAllCollaborators(@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	{
+		return new ResponseEntity<Response>(new Response("note collaborators are",colabimpl.getAllColabs(token, noteid),200),HttpStatus.OK);
+	}
 }
