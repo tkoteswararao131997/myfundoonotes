@@ -34,8 +34,6 @@ public class CollaboratorServiceImpl implements CollaboratorService {
 	private CollaboratorRepository collabrepo;
 	@Override
 	public NoteEntity addColabToNote(CollaboratorDto colabDto, String token, long noteid) {
-//		if(collabrepo.isColabExists(colabDto.getColabEmail()).isPresent())
-//			throw new CustomException("collaborator already exists",HttpStatus.BAD_REQUEST,null);
 		long userid=jwt.parseJWT(token);
 		UserEntity user=userimpl.getUserById(userid);
 		NoteEntity note=noteimpl.getNoteById(noteid, userid);

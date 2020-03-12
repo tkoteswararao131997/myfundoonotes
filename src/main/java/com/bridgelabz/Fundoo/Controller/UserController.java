@@ -1,6 +1,8 @@
 package com.bridgelabz.Fundoo.Controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,7 +13,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.bridgelabz.Fundoo.Dto.ForgotPwdDto;
 import com.bridgelabz.Fundoo.Dto.LoginDto;
@@ -19,12 +24,15 @@ import com.bridgelabz.Fundoo.Dto.UpdatePwdDto;
 import com.bridgelabz.Fundoo.Dto.UserDto;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
 import com.bridgelabz.Fundoo.Response.Response;
+import com.bridgelabz.Fundoo.Service.AmazonS3ClientService;
 import com.bridgelabz.Fundoo.ServiceImpl.UserServiceImpl;
 
 @RestController
 public class UserController {
 	@Autowired
 	private UserServiceImpl userimpl;
+	@Autowired
+    private AmazonS3ClientService amazonS3ClientService;
 	
 	/**
 	 * Register User : used to register the user
@@ -105,5 +113,27 @@ public class UserController {
 	{
 		return new ResponseEntity<Response>(new Response("password updated and sent to mail successfully","your new pwd is:"+userimpl.forgotPwd(forgotdto),200),HttpStatus.OK);
 	}
+	
+	@PostMapping
+    public Map<String, String> uploadFile(@RequestPart(value = "file") MultipartFile file)
+    {
+        this.amazonS3ClientService.uploadFileToS3Bucket(file, true);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "file [" + file.getOriginalFilename() + "] uploading request submitted successfully.");
+
+        return response;
+    }
+
+    @DeleteMapping
+    public Map<String, String> deleteFile(@RequestParam("file_name") String fileName)
+    {
+        this.amazonS3ClientService.deleteFileFromS3Bucket(fileName);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "file [" + fileName + "] removing request submitted successfully.");
+
+        return response;
+    }
 	
 }
