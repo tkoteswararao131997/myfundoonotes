@@ -38,8 +38,7 @@ public class NoteEntity {
 	private List<LabelEntity> labels;
 	
 	@OneToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH},fetch = FetchType.LAZY)
-	@JoinColumn(columnDefinition = "noteId",referencedColumnName = "noteId")
-	private List<NoteEntity> colaborators;
+	private List<UserEntity> collaborators;
 	
 
 }

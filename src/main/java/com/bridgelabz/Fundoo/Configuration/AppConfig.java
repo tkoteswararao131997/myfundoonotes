@@ -3,8 +3,6 @@ package com.bridgelabz.Fundoo.Configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
-import com.bridgelabz.Fundoo.Entity.CollaboratorEntity;
 import com.bridgelabz.Fundoo.Entity.LabelEntity;
 import com.bridgelabz.Fundoo.Entity.NoteEntity;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
@@ -35,10 +33,5 @@ public class AppConfig {
 	public LabelEntity labelentity()
 	{
 		return new LabelEntity();
-	}
-	@Bean
-	public CollaboratorEntity colabentity()
-	{
-		return new CollaboratorEntity();
 	}
 }
