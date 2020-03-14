@@ -86,7 +86,9 @@ public class LabelServiceImpl implements LabelServiceInf
 		UserEntity user=userimpl.getUserById(userid);
 		LabelEntity label=getLabelById(labelid);
 		labelrepo.setcheck();
-		labelrepo.delete(label);
+		labelrepo.deleteLabel(labelid);
+//		user.getNotes().remove(label);
+//		userrepo.save(user);
 		
 	}
 	@Override

@@ -17,6 +17,8 @@ import com.bridgelabz.Fundoo.Exception.CustomException;
 import com.bridgelabz.Fundoo.Repository.UserRepository;
 import com.bridgelabz.Fundoo.Service.UserServiceInf;
 import com.bridgelabz.Fundoo.Utility.JwtOperations;
+import com.bridgelabz.Fundoo.Utility.MailService;
+import com.bridgelabz.Fundoo.Utility.RabbitMQSender;
 
 @Service
 public class UserServiceImpl implements UserServiceInf {
@@ -26,6 +28,8 @@ public class UserServiceImpl implements UserServiceInf {
 	private BCryptPasswordEncoder pwdencoder;
 	@Autowired
 	private JwtOperations jwt=new JwtOperations();
+	@Autowired
+	private RabbitMQSender mailsender;
 	public static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 	@Override
 	public UserEntity registerUser(UserDto dto)
@@ -40,6 +44,7 @@ public class UserServiceImpl implements UserServiceInf {
 		log.info(entity.getName()+" registered "+"date:"+entity.getCreateDate());
 		String body="http://localhost:8080/verifyemail/"+jwt.jwtToken(entity.getUserid());
 		jwt.sendEmail(entity.getEmail(),"verification email",body);
+		mailsender.send(new MailService(entity.getEmail(),"verification",body));
 		return entity;
 	}
 	@Override

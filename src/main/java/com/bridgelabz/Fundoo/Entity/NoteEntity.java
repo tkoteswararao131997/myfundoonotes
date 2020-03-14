@@ -1,6 +1,7 @@
 package com.bridgelabz.Fundoo.Entity;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -15,11 +16,16 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerator;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import lombok.Data;
 @Data
 @Entity
 @Table(name="notes")
-public class NoteEntity {
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class,scope = NoteEntity.class)
+public class NoteEntity implements Comparable<NoteEntity>{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long noteId;
@@ -37,8 +43,14 @@ public class NoteEntity {
 	@ManyToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY)
 	private List<LabelEntity> labels;
 	
-	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH},fetch = FetchType.LAZY)
+	@ManyToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY)
 	private List<UserEntity> collaborators;
+
+	@Override
+	public int compareTo(NoteEntity arg0) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 	
 
 }

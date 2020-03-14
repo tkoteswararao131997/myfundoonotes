@@ -31,8 +31,8 @@ public interface LabelRepository extends JpaRepository<LabelEntity, String> {
 	
 	@Modifying
 	@Transactional
-//	//@Query(value="delete labels,notes from labels inner join notes on labels.userid=notes.userid where labels.label_id=?1",nativeQuery = true)
-	@Query(value="delete from labels where label_id=?1",nativeQuery = true)
+	@Query(value="delete labels,notes_labels from labels inner join notes_labels on labels.label_id=notes_labels.labels_label_id where labels.label_id=?1",nativeQuery = true)
+	//@Query(value="delete from labels where label_id=?1",nativeQuery = true)
 	void deleteLabel(long labelId);
 	
 }

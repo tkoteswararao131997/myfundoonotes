@@ -36,6 +36,8 @@ public class CollaboratorServiceImpl implements CollaboratorService {
 	public NoteEntity addColabToNote(CollaboratorDto colabDto, String token, long noteid) {
 		long userid=jwt.parseJWT(token);
 		UserEntity user=userimpl.getUserById(userid);
+		if((user.getEmail().equals(colabDto.getColabEmail())))
+			throw new CustomException("u r the owner",HttpStatus.NOT_ACCEPTABLE,null);
 		NoteEntity note=noteimpl.getNoteById(noteid, userid);
 		UserEntity colabuser=userimpl.getUserByEmail(colabDto.getColabEmail());
 		note.getCollaborators().add(colabuser);

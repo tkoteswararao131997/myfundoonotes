@@ -183,5 +183,10 @@ public class NoteController {
 		noteimpl.deleteRemindMe(token,noteid);
 		return new ResponseEntity<Response>(new Response("remindme is deleted",null,200),HttpStatus.OK);
 	}
-			
+		
+	@GetMapping("/allnotesbytitle/{token}")
+	public ResponseEntity<Response> getAllNotesByTitle(@PathVariable("token") String token)
+	{
+		return new ResponseEntity<Response>(new Response("your notes are",noteimpl.getAllNotesByTitle(token),200),HttpStatus.OK);
+	}
 }
