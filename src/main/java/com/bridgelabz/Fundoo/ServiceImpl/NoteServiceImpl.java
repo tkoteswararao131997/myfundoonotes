@@ -177,7 +177,6 @@ public class NoteServiceImpl implements NoteServiceInf {
 		userentity=userimpl.getUserById(id);
 		List<NoteEntity> notes=noterepo.getAllNotes(id).orElseThrow(() -> new CustomException("no notes in the list",HttpStatus.NOT_FOUND,null));
 		List<NoteEntity>sortNotes=notes.parallelStream().sorted(Comparator.comparing(NoteEntity::getTitle)).collect(Collectors.toList());
-		//List<User> sortedUsers = users.stream() .sorted(Comparator.comparing(User::getCreatedOn)) .collect(Collectors.toList());
 		return sortNotes;
 	}
 	

@@ -13,6 +13,6 @@ public class MyfundoonotesApplication{
 
 	public static void main(String[] args) {
 		SpringApplication.run(MyfundoonotesApplication.class, args);
-		log.info("Simple log statement with inputs {}, {} and {}", 1, 2, 3);
+		//log.info("Simple log statement with inputs {}, {} and {}", 1, 2, 3);
 	}
 }

@@ -2,25 +2,19 @@ package com.bridgelabz.Fundoo.Utility;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RabbitMQSender {
-@Autowired
-private RabbitTemplate rabbitTemplate;
 
-@Value("rmq.rube.exchange")
-private String exchange;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
-@Value("rube.key")
-private String routingkey;
+    @Autowired
+    RabbitMQProperties rabbitMQProperties;
 
-public boolean send(MailService message) {
-rabbitTemplate.convertAndSend(exchange, routingkey, message);
-return true;
+    public void sendMessage(Notification msg){
+        System.out.println("Send msg = " + msg.toString());
+        rabbitTemplate.convertAndSend("","", msg);
+    }
 }
-
-}
-
-
