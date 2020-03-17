@@ -1,10 +1,7 @@
 package com.bridgelabz.Fundoo.Utility;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-@ConfigurationProperties(prefix = "rabbitmq")
+//@Configuration
+//@ConfigurationProperties(prefix = "rabbitmq")
 public class RabbitMQProperties {
 
     private String queueName;

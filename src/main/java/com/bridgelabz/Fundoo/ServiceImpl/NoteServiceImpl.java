@@ -14,6 +14,7 @@ import com.bridgelabz.Fundoo.Dto.UpdateNoteDto;
 import com.bridgelabz.Fundoo.Entity.NoteEntity;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
 import com.bridgelabz.Fundoo.Exception.CustomException;
+import com.bridgelabz.Fundoo.Repository.ElasticSearchRepository;
 import com.bridgelabz.Fundoo.Repository.NoteRepository;
 import com.bridgelabz.Fundoo.Repository.UserRepository;
 import com.bridgelabz.Fundoo.Service.NoteServiceInf;
@@ -32,6 +33,8 @@ public class NoteServiceImpl implements NoteServiceInf {
 	private NoteEntity noteentity;
 	@Autowired
 	private UserRepository userrepo;
+	@Autowired
+	ElasticSearchRepository elasticRepo;
 	@Override
 	public NoteEntity addNote(NoteDto notedto, String token) {
 		long id=jwt.parseJWT(token);
@@ -47,6 +50,7 @@ public class NoteServiceImpl implements NoteServiceInf {
 		noteentity.setTrashed(false);
 		userentity.getNotes().add(noteentity);
 		userrepo.save(userentity);
+		elasticRepo.createNote(noteentity);
 		return noteentity;
 	}
 	@Override
@@ -62,6 +66,7 @@ public class NoteServiceImpl implements NoteServiceInf {
 		userimpl.getUserById(userid);
 		NoteEntity note=getNoteById(noteid, userid);
 		noterepo.delete(note);
+		elasticRepo.deleteNote(note);
 	}
 	
 	public NoteEntity getNoteById(long noteid,long userid)
@@ -83,6 +88,7 @@ public class NoteServiceImpl implements NoteServiceInf {
 		NoteEntity note=getNoteById(noteid, userid);
 		BeanUtils.copyProperties(updatenotedto, note);
 		noterepo.save(note);
+		elasticRepo.updateNote(note);
 		return note;
 	}
 	@Override

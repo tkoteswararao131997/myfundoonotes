@@ -1,10 +1,8 @@
 package com.bridgelabz.Fundoo.Utility;
 
-import org.springframework.stereotype.Component;
-
 import com.google.gson.Gson;
 
-@Component
+//@Component
 public class RabbitMqListener {
 
     //@RabbitListener(queues="${rabbitmq.queueName}")

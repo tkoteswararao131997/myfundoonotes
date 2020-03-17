@@ -1,13 +1,13 @@
 package com.bridgelabz.Fundoo.ServiceImpl;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import com.bridgelabz.Fundoo.Dto.ForgotPwdDto;
 import com.bridgelabz.Fundoo.Dto.LoginDto;
 import com.bridgelabz.Fundoo.Dto.UpdatePwdDto;
@@ -17,9 +17,6 @@ import com.bridgelabz.Fundoo.Exception.CustomException;
 import com.bridgelabz.Fundoo.Repository.UserRepository;
 import com.bridgelabz.Fundoo.Service.UserServiceInf;
 import com.bridgelabz.Fundoo.Utility.JwtOperations;
-import com.bridgelabz.Fundoo.Utility.MailService;
-import com.bridgelabz.Fundoo.Utility.Notification;
-import com.bridgelabz.Fundoo.Utility.RabbitMQSender;
 
 @Service
 public class UserServiceImpl implements UserServiceInf {
@@ -29,8 +26,8 @@ public class UserServiceImpl implements UserServiceInf {
 	private BCryptPasswordEncoder pwdencoder;
 	@Autowired
 	private JwtOperations jwt=new JwtOperations();
-	@Autowired
-	private RabbitMQSender mailsender;
+	//@Autowired
+	//private RabbitMQSender mailsender;
 	//public static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 	@Override
 	public UserEntity registerUser(UserDto dto)
@@ -45,7 +42,7 @@ public class UserServiceImpl implements UserServiceInf {
 		//log.info(entity.getName()+" registered "+"date:"+entity.getCreateDate());
 		String body="http://localhost:8080/verifyemail/"+jwt.jwtToken(entity.getUserid());
 		jwt.sendEmail(entity.getEmail(),"verification email",body);
-		mailsender.sendMessage(new Notification(entity.getEmail(),"verification"));
+		//mailsender.sendMessage(new Notification(entity.getEmail(),"verification"));
 		return entity;
 	}
 	@Override
