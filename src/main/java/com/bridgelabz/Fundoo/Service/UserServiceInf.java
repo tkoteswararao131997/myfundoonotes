@@ -3,6 +3,7 @@ package com.bridgelabz.Fundoo.Service;
 import java.util.List;
 import java.util.Optional;
 
+import com.bridgelabz.Fundoo.Dto.ForgotPwdDto;
 import com.bridgelabz.Fundoo.Dto.LoginDto;
 import com.bridgelabz.Fundoo.Dto.UpdatePwdDto;
 import com.bridgelabz.Fundoo.Dto.UserDto;
@@ -18,5 +19,6 @@ public interface UserServiceInf {
 	boolean isEmailExists(String email);
 	String loginUser(LoginDto dto);
 	UserEntity updatepwd(UpdatePwdDto pwddto);
+	String forgotPwd(ForgotPwdDto forgotdto);
 
 }

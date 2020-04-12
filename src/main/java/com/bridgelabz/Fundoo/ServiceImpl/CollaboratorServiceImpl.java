@@ -37,7 +37,7 @@ public class CollaboratorServiceImpl implements CollaboratorService {
 		long userid=jwt.parseJWT(token);
 		UserEntity user=userimpl.getUserById(userid);
 		if((user.getEmail().equals(colabDto.getColabEmail())))
-			throw new CustomException("u r the owner",HttpStatus.NOT_ACCEPTABLE,null);
+			throw new CustomException("u r the owner",HttpStatus.NOT_ACCEPTABLE,null,"false");
 		NoteEntity note=noteimpl.getNoteById(noteid, userid);
 		UserEntity colabuser=userimpl.getUserByEmail(colabDto.getColabEmail());
 		note.getCollaborators().add(colabuser);
@@ -51,10 +51,14 @@ public class CollaboratorServiceImpl implements CollaboratorService {
 		UserEntity user=userimpl.getUserById(userid);
 		NoteEntity note=noteimpl.getNoteById(noteid, userid);
 		UserEntity colabuser=userimpl.getUserByEmail(colabdto.getColabEmail());
-		if(collabrepo.isColabInNote(colabuser.getUserid(),note.getNoteId()).isEmpty())
-			throw new CustomException("collaborator not present",HttpStatus.NOT_FOUND,null);
-		note.getCollaborators().remove(colabuser);
-		noterepo.save(note);	
+		if(collabrepo.isColabInNote(colabuser.getUserid(),note.getNoteId()).isPresent())
+		{
+			note.getCollaborators().remove(colabuser);
+			noterepo.save(note);
+		}
+		else
+			throw new CustomException("collaborator not present",HttpStatus.NOT_FOUND,null,"false");
+			
 	}
 
 	@Override

@@ -6,5 +6,4 @@ import lombok.Data;
 public class UpdateNoteDto {
 	private String title;
 	private String description;
-	private String color;
 }

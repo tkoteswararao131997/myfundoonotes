@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.bridgelabz.Fundoo.Dto.ForgotPwdDto;
 import com.bridgelabz.Fundoo.Dto.LoginDto;
@@ -19,6 +20,7 @@ import com.bridgelabz.Fundoo.Service.UserServiceInf;
 import com.bridgelabz.Fundoo.Utility.JwtOperations;
 
 @Service
+@CrossOrigin
 public class UserServiceImpl implements UserServiceInf {
 	@Autowired
 	private UserRepository userrepo;
@@ -47,40 +49,43 @@ public class UserServiceImpl implements UserServiceInf {
 	}
 	@Override
 	public String loginUser(LoginDto dto) {
-		UserEntity user=userrepo.getUserByEmail(dto.getEmail()).orElseThrow(() -> new CustomException("login failed",HttpStatus.NOT_FOUND,null));
+		UserEntity user=userrepo.getUserByEmail(dto.getEmail()).orElseThrow(() -> new CustomException("login failed",HttpStatus.OK,null,"false"));
 		boolean ispwd=pwdencoder.matches(dto.getPassword(),user.getPassword());
-		if(ispwd==false || user.isVerifyEmail()==false)
-			throw new CustomException("login failed",HttpStatus.NOT_FOUND,null);
-		String token=jwt.jwtToken(user.getUserid());
-		return token;
-		
+		if(ispwd==false || user.isVerifyEmail()==false) {
+			throw new CustomException("login failed",HttpStatus.OK,null,"false");
+		} else {
+			String token=jwt.jwtToken(user.getUserid());
+			return token;
+			
+		}
+
 	}
 	@Override
 	public List<UserEntity> getall()
 	{
-		return userrepo.getAllUsers().orElseThrow(() -> new CustomException("no users present", HttpStatus.NOT_FOUND,null));
+		return userrepo.getAllUsers().orElseThrow(() -> new CustomException("no users present", HttpStatus.OK,null,"false"));
 	}
 	@Override
 	public UserEntity getUserByEmail(String email) {
-	UserEntity user=userrepo.getUserByEmail(email).orElseThrow(() -> new CustomException("email not exists",HttpStatus.BAD_REQUEST,null));
+	UserEntity user=userrepo.getUserByEmail(email).orElseThrow(() -> new CustomException("email not exists",HttpStatus.OK,null,"false"));
 	return user;
 	}
 	
 	@Override
 	public UserEntity verify(String token) {
 		long id=jwt.parseJWT(token);
-		UserEntity user=userrepo.isIdExists(id).orElseThrow(() -> new CustomException("user not exists",HttpStatus.BAD_REQUEST,id));
+		UserEntity user=userrepo.isIdExists(id).orElseThrow(() -> new CustomException("user not exists",HttpStatus.OK,id,"false"));
 		user.setVerifyEmail(true);
 		userrepo.save(user);
 		return user;
 	}
 	@Override
 	public UserEntity getUserById(long id) {
-		return userrepo.getUserById(id).orElseThrow(() -> new CustomException("user not exists",HttpStatus.BAD_REQUEST,id));
+		return userrepo.getUserById(id).orElseThrow(() -> new CustomException("user not exists",HttpStatus.OK,id,"false"));
 	}
 	@Override
 	public boolean isIdPresent(long id) {
-		UserEntity user=userrepo.getUserById(id).orElseThrow(() -> new CustomException("user not exists",HttpStatus.BAD_REQUEST,id));
+		UserEntity user=userrepo.getUserById(id).orElseThrow(() -> new CustomException("user not exists",HttpStatus.OK,id,"false"));
 		if(user.getEmail()!=null)
 		return true;
 		return false;
@@ -92,35 +97,23 @@ public class UserServiceImpl implements UserServiceInf {
 	@Override
 	public boolean isEmailExists(String email) {
 		if(userrepo.isEmailExists(email).isPresent())
-			throw new CustomException("email already exists",HttpStatus.NOT_ACCEPTABLE,null);
+			throw new CustomException("email already exists",HttpStatus.OK,null,"false");
 		return false;
 	}
 	@Override
 	public UserEntity updatepwd(UpdatePwdDto pwddto) {
-		UserEntity user=getUserByEmail(pwddto.getEmail());
-		if((pwddto.getNewpassword().equals(pwddto.getConformpassword()) && (pwdencoder.matches(pwddto.getOldpassword(),user.getPassword()))))
-		{
-			user.setPassword(pwdencoder.encode(pwddto.getConformpassword()));
+			long userid=jwt.parseJWT(pwddto.getToken());
+			UserEntity user=getUserById(userid);
+			user.setPassword(pwdencoder.encode(pwddto.getNewpassword()));
 			userrepo.save(user);
 			return user;
-		}
-		else {
-			throw new CustomException("password not matching",HttpStatus.NOT_ACCEPTABLE,null);
-		}
 	}
+	@Override
 	public String forgotPwd(ForgotPwdDto forgotdto) {
 		UserEntity user=getUserByEmail(forgotdto.getEmail());
-		if(user.getUserid()==forgotdto.getUserid() && forgotdto.getNewpassword().equals(forgotdto.getConformpassword()))
-		{
-			user.setPassword(pwdencoder.encode(forgotdto.getConformpassword()));
-			userrepo.save(user);
-			jwt.sendEmail(user.getEmail(),"your new password",forgotdto.getConformpassword());
-			return forgotdto.getConformpassword();
-		}
-		else
-		{
-			throw new CustomException("enter valid details",HttpStatus.NOT_ACCEPTABLE,null);
-		}
+		String body="http://localhost:4200/resetpassword/"+jwt.jwtToken(user.getUserid());
+		jwt.sendEmail(user.getEmail(),"Reset Password",body);
+		return "success";
 	}
 	
 }

@@ -1,12 +1,14 @@
 package com.bridgelabz.Fundoo.Dto;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+
 import lombok.Data;
 
 @Data
 public class ForgotPwdDto {
+	@NotBlank
+	@Email
 	private String email;
-	private long userid;
-	private String newpassword;
-	private String conformpassword;
 
 }

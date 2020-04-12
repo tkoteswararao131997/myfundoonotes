@@ -7,6 +7,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,6 +31,7 @@ import com.bridgelabz.Fundoo.Service.AmazonS3ClientService;
 import com.bridgelabz.Fundoo.ServiceImpl.UserServiceImpl;
 
 @RestController
+@CrossOrigin("*") 
 public class UserController {
 	@Autowired
 	private UserServiceImpl userimpl;
@@ -40,10 +44,14 @@ public class UserController {
 	 * @return register response
 	 */
 	@PostMapping("/registeruser")
-	public ResponseEntity<Response> registerUser(@RequestBody UserDto dto)
+	@ResponseStatus(HttpStatus.CREATED)
+	public ResponseEntity<Response> registerUser(@RequestBody UserDto dto,BindingResult result)
 	{
+
+			if(result.hasErrors())
+			return new ResponseEntity<Response>(new Response("invalid details",null,400,"true"),HttpStatus.BAD_REQUEST);
 			UserEntity user=userimpl.registerUser(dto);
-			return new ResponseEntity<Response>(new Response("regitration sucess",user,201),HttpStatus.CREATED);		
+			return new ResponseEntity<Response>(new Response("regitration sucess",user,201,"true"),HttpStatus.CREATED);		
 	}
 	/**
 	 * Login User:used to login the user
@@ -52,10 +60,13 @@ public class UserController {
 	 */
 	
 	@PostMapping("/loginuser")
-	public ResponseEntity<Response> loginUser(@RequestBody LoginDto dto)
+	public ResponseEntity<Response> loginUser(@RequestBody LoginDto dto,BindingResult result)
 	{
+
+		if(result.hasErrors())
+		return new ResponseEntity<Response>(new Response("invalid details",null,400,"true"),HttpStatus.BAD_REQUEST);
 		String token=userimpl.loginUser(dto);
-		return new ResponseEntity<Response>(new Response("login success","token is:"+token,200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("login success",token,200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Get All Users: used to display all the users in the table
@@ -65,7 +76,7 @@ public class UserController {
 	public ResponseEntity<Response> getAllUsers()
 	{
 		List<UserEntity> users=userimpl.getall();
-		return new ResponseEntity<Response>(new Response("users are",users,200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("users are",users,200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Verify Eamil : used to verify the email whether sent link is correct or not
@@ -75,7 +86,7 @@ public class UserController {
 	@GetMapping("/verifyemail/{token}")
 	public ResponseEntity<Response> verifyemail(@PathVariable("token") String token)
 	{
-		return new ResponseEntity<Response>(new Response("email verified",userimpl.verify(token),201),HttpStatus.ACCEPTED);
+		return new ResponseEntity<Response>(new Response("email verified",userimpl.verify(token),201,"true"),HttpStatus.ACCEPTED);
 	}
 	/**
 	 * Delete User: used to delete the present user
@@ -86,7 +97,7 @@ public class UserController {
 	public ResponseEntity<Response> deleteUser(@PathVariable("userId") long userId)
 	{
 			userimpl.deleteUser(userId);
-			return new ResponseEntity<Response>(new Response("user deleted",null,200),HttpStatus.OK);
+			return new ResponseEntity<Response>(new Response("user deleted",null,200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Get User By id : get the user based upon user id in the table
@@ -94,24 +105,30 @@ public class UserController {
 	 * @return user
 	 */
 	@GetMapping("/getuserbyid/{userId}")
-	public ResponseEntity<Response> getuserById(@PathVariable("userId") long userId)
+	public ResponseEntity<Response> getuserById(@PathVariable("userId") long userId,BindingResult result)
 	{
-		return new ResponseEntity<Response>(new Response("welcome",userimpl.getUserById(userId),200),HttpStatus.OK);
+
+		if(result.hasErrors())
+		return new ResponseEntity<Response>(new Response("invalid details",null,400,"true"),HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<Response>(new Response("welcome",userimpl.getUserById(userId),200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Update Password : set new password for user
 	 * @param pwddto
 	 * @return response od update password
 	 */
-	@PutMapping("/updatepassword")
-	public ResponseEntity<Response> updatePassword(@RequestBody UpdatePwdDto pwddto)
+	@PostMapping("/updatepassword")
+	public ResponseEntity<Response> updatePassword(@RequestBody UpdatePwdDto pwddto,BindingResult result)
 	{
-		return new ResponseEntity<Response>(new Response("password updated successfully", userimpl.updatepwd(pwddto),200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("password updated successfully", userimpl.updatepwd(pwddto),200,"true"),HttpStatus.OK);
 	}
-	@PutMapping("/forgotpassword")
-	public ResponseEntity<Response> forgotPassword(@RequestBody ForgotPwdDto forgotdto)
+	@PostMapping("/forgotpassword")
+	public ResponseEntity<Response> forgotPassword(@RequestBody ForgotPwdDto forgotdto,BindingResult result)
 	{
-		return new ResponseEntity<Response>(new Response("password updated and sent to mail successfully","your new pwd is:"+userimpl.forgotPwd(forgotdto),200),HttpStatus.OK);
+
+		if(result.hasErrors())
+		return new ResponseEntity<Response>(new Response("invalid details",null,400,"true"),HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<Response>(new Response("password updated and sent to mail successfully","your new pwd is:"+userimpl.forgotPwd(forgotdto),200,"true"),HttpStatus.OK);
 	}
 	
 	@PostMapping

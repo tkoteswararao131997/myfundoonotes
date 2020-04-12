@@ -11,12 +11,14 @@ import lombok.NoArgsConstructor;
 public class CustomException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 	private String message;
-	private HttpStatus status;
+	HttpStatus status;
 	private Object data;
-	public CustomException(String message,HttpStatus status,Object data) {
+	String statusMsg;
+	public CustomException(String message,HttpStatus status,Object data,String statusMsg) {
 		this.status=status;
 		this.message=message;
 		this.data=data;
+		this.statusMsg=statusMsg;
 		
 	}
 }

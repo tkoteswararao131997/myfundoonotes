@@ -1,13 +1,19 @@
 package com.bridgelabz.Fundoo.Dto;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
 import lombok.Data;
 
 @Data
 public class UpdatePwdDto {
-	private String email;
-	private String oldpassword;
+	@NotBlank
+	@Size(min=6,max=10)
 	private String newpassword;
+	@NotBlank
+	@Size(min=6,max=10)
 	private String conformpassword;
+	private String token;
 	
 
 }

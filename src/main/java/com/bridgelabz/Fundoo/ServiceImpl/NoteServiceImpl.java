@@ -8,6 +8,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.bridgelabz.Fundoo.Dto.NoteDto;
 import com.bridgelabz.Fundoo.Dto.UpdateNoteDto;
@@ -20,6 +21,7 @@ import com.bridgelabz.Fundoo.Repository.UserRepository;
 import com.bridgelabz.Fundoo.Service.NoteServiceInf;
 import com.bridgelabz.Fundoo.Utility.JwtOperations;
 @Service
+@CrossOrigin("*")
 public class NoteServiceImpl implements NoteServiceInf {
 	@Autowired
 	private NoteRepository noterepo;
@@ -37,11 +39,13 @@ public class NoteServiceImpl implements NoteServiceInf {
 	ElasticSearchRepository elasticRepo;
 	@Override
 	public NoteEntity addNote(NoteDto notedto, String token) {
+		System.out.println(token);
 		long id=jwt.parseJWT(token);
 		if(noterepo.isNoteExists(notedto.getTitle(),id).isPresent())
-			throw new CustomException("note already exists", HttpStatus.NOT_ACCEPTABLE,null);
+			throw new CustomException("note already exists", HttpStatus.NOT_ACCEPTABLE,null,"false");
 		userentity=userimpl.getUserById(id);
 		BeanUtils.copyProperties(notedto, noteentity);
+		noteentity.setColor("white");
 		noteentity.setArchieve(false);
 		noteentity.setCreateDate(LocalDateTime.now());
 		noteentity.setUpdateDate(LocalDateTime.now());
@@ -50,14 +54,14 @@ public class NoteServiceImpl implements NoteServiceInf {
 		noteentity.setTrashed(false);
 		userentity.getNotes().add(noteentity);
 		userrepo.save(userentity);
-		elasticRepo.createNote(noteentity);
+		//elasticRepo.createNote(noteentity);
 		return noteentity;
 	}
 	@Override
 	public List<NoteEntity> getAllNotes(String token) {
 		long id=jwt.parseJWT(token);
 		userentity=userimpl.getUserById(id);
-		List<NoteEntity> notes=noterepo.getAllNotes(id).orElseThrow(() -> new CustomException("no notes in the list",HttpStatus.NOT_FOUND,null));
+		List<NoteEntity> notes=noterepo.getAllNotes(id).orElseThrow(() -> new CustomException("no notes in the list",HttpStatus.OK,null,"false"));
 		return notes;
 	}
 	@Override
@@ -66,12 +70,12 @@ public class NoteServiceImpl implements NoteServiceInf {
 		userimpl.getUserById(userid);
 		NoteEntity note=getNoteById(noteid, userid);
 		noterepo.delete(note);
-		elasticRepo.deleteNote(note);
+		//elasticRepo.deleteNote(note);
 	}
 	
 	public NoteEntity getNoteById(long noteid,long userid)
 	{
-		return noterepo.getNoteById(noteid, userid).orElseThrow(() -> new CustomException("no notes in the list",HttpStatus.NOT_FOUND,null));
+		return noterepo.getNoteById(noteid, userid).orElseThrow(() -> new CustomException("no notes in the list",HttpStatus.OK,null,"false"));
 	}
 	@Override
 	public void deleteAllNotes(String token) 
@@ -88,7 +92,7 @@ public class NoteServiceImpl implements NoteServiceInf {
 		NoteEntity note=getNoteById(noteid, userid);
 		BeanUtils.copyProperties(updatenotedto, note);
 		noterepo.save(note);
-		elasticRepo.updateNote(note);
+		//elasticRepo.updateNote(note);
 		return note;
 	}
 	@Override
@@ -125,6 +129,7 @@ public class NoteServiceImpl implements NoteServiceInf {
 	}
 	@Override
 	public NoteEntity isTrashed(String token, long noteid) {
+		System.out.println(token);
 		long userid= jwt.parseJWT(token);
 		userimpl.getUserById(userid);
 		NoteEntity note=getNoteById(noteid, userid);
@@ -148,20 +153,20 @@ public class NoteServiceImpl implements NoteServiceInf {
 	}
 	public List<NoteEntity> getAllPinNotes(String token) {
 		long id=jwt.parseJWT(token);
-		List<NoteEntity> notes=noterepo.getAllNotes(id).orElseThrow();
+		List<NoteEntity> notes=noterepo.getAllNotes(id).orElseThrow(null);
 		List<NoteEntity> pinNotes=notes.stream().filter(archieve -> archieve.isPinned()==true).collect(Collectors.toList());		
 		return pinNotes;
 	}
 	public List<NoteEntity> getAllArchieveNotes(String token) {
 		long id=jwt.parseJWT(token);
 		userentity=userimpl.getUserById(id);
-		List<NoteEntity> notes=noterepo.getAllNotes(id).orElseThrow();
+		List<NoteEntity> notes=noterepo.getAllNotes(id).orElseThrow(null);
 		List<NoteEntity> archieveNotes=notes.stream().filter(archieve -> archieve.isArchieve()==true).collect(Collectors.toList());		
 		return archieveNotes;
 	}
 	public NoteEntity getNoteById(String token, long noteid) {
 		long userid=jwt.parseJWT(token);
-		return noterepo.getNoteById(noteid, userid).orElseThrow(() -> new CustomException("no notes in the list",HttpStatus.NOT_FOUND,null));
+		return noterepo.getNoteById(noteid, userid).orElseThrow(() -> new CustomException("no notes in the list",HttpStatus.OK,null,"false"));
 	}
 	public NoteEntity UpdateRemindMe(LocalDateTime remindme, String token, long noteid) {
 		long userid=jwt.parseJWT(token);
@@ -181,9 +186,23 @@ public class NoteServiceImpl implements NoteServiceInf {
 	public List<NoteEntity> getAllNotesByTitle(String token) {
 		long id=jwt.parseJWT(token);
 		userentity=userimpl.getUserById(id);
-		List<NoteEntity> notes=noterepo.getAllNotes(id).orElseThrow(() -> new CustomException("no notes in the list",HttpStatus.NOT_FOUND,null));
+		List<NoteEntity> notes=noterepo.getAllNotes(id).orElseThrow(() -> new CustomException("no notes in the list",HttpStatus.OK,null,"false"));
 		List<NoteEntity>sortNotes=notes.parallelStream().sorted(Comparator.comparing(NoteEntity::getTitle)).collect(Collectors.toList());
 		return sortNotes;
+	}
+	public List<NoteEntity> getAllTrashedNotes(String token) {
+		long id=jwt.parseJWT(token);
+		List<NoteEntity> notes=noterepo.getAllNotes(id).orElseThrow(null);
+		List<NoteEntity> pinNotes=notes.stream().filter(archieve -> archieve.isTrashed()==true).collect(Collectors.toList());		
+		return pinNotes;
+	}
+	public NoteEntity changeNoteColor(String color, String token, long noteid) {
+		long userid=jwt.parseJWT(token);
+		userentity=userimpl.getUserById(userid);
+		NoteEntity note=getNoteById(noteid, userid);
+		note.setColor(color);
+		noterepo.save(note);
+		return note;
 	}
 	
 

@@ -3,6 +3,7 @@ package com.bridgelabz.Fundoo.Controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,21 +22,27 @@ public class CollaboratorController {
 	private CollaboratorServiceImpl colabimpl;
 	
 	@PostMapping("/addcollaborator/{token}/{noteid}")
-	public ResponseEntity<Response> addCollaborator(@RequestBody CollaboratorDto colabemail,@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	public ResponseEntity<Response> addCollaborator(@RequestBody CollaboratorDto colabemail,@PathVariable("token") String token,@PathVariable("noteid") long noteid,BindingResult result)
 	{
-		return new ResponseEntity<Response>(new Response("collaborator added",colabimpl.addColabToNote(colabemail, token, noteid),201),HttpStatus.CREATED);
+
+		if(result.hasErrors())
+		return new ResponseEntity<Response>(new Response("invalid details",null,400,"true"),HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<Response>(new Response("collaborator added",colabimpl.addColabToNote(colabemail, token, noteid),201,"true"),HttpStatus.CREATED);
 	}
 	
 	@DeleteMapping("/deletecollaborator/{token}/{noteid}")
-	public ResponseEntity<Response> deleteCollaborator(@RequestBody CollaboratorDto colabemail,@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	public ResponseEntity<Response> deleteCollaborator(@RequestBody CollaboratorDto colabemail,@PathVariable("token") String token,@PathVariable("noteid") long noteid,BindingResult result)
 	{
+
+		if(result.hasErrors())
+		return new ResponseEntity<Response>(new Response("invalid details",null,400,"true"),HttpStatus.BAD_REQUEST);
 		colabimpl.deleteColabFromNote(colabemail, token, noteid);
-		return new ResponseEntity<Response>(new Response("collaborator deleted",null,200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("collaborator deleted",null,200,"true"),HttpStatus.OK);
 	}
 	
 	@GetMapping("/getallcollaborators/{token}/{noteid}")
 	public ResponseEntity<Response> getAllCollaborators(@PathVariable("token") String token,@PathVariable("noteid") long noteid)
 	{
-		return new ResponseEntity<Response>(new Response("note collaborators are",colabimpl.getAllColabs(token, noteid),200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("note collaborators are",colabimpl.getAllColabs(token, noteid),200,"true"),HttpStatus.OK);
 	}
 }

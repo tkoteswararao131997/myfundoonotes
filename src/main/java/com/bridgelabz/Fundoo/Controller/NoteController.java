@@ -1,6 +1,7 @@
 package com.bridgelabz.Fundoo.Controller;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.validation.Valid;
 
@@ -8,12 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bridgelabz.Fundoo.Dto.NoteDto;
@@ -23,6 +26,7 @@ import com.bridgelabz.Fundoo.Response.Response;
 import com.bridgelabz.Fundoo.ServiceImpl.NoteServiceImpl;
 
 @RestController
+@CrossOrigin("*")
 public class NoteController {
 	@Autowired
 	private NoteServiceImpl noteimpl;
@@ -34,12 +38,12 @@ public class NoteController {
 	 * @param result
 	 * @return note added or not response
 	 */
-	@PostMapping("/addnote/{token}")
-	public ResponseEntity<Response> addNote(@Valid @RequestBody NoteDto notedto,@PathVariable("token") String token,BindingResult result)
+	@PostMapping("/addnote")
+	public ResponseEntity<Response> addNote(@Valid @RequestBody NoteDto notedto,@RequestHeader String token,BindingResult result)
 	{
 		if(result.hasErrors())
-			return new ResponseEntity<Response>(new Response("invalid details",null,400),HttpStatus.BAD_REQUEST);
-		return new ResponseEntity<Response>(new Response("note added",noteimpl.addNote(notedto,token),201),HttpStatus.CREATED);
+			return new ResponseEntity<Response>(new Response("invalid details",null,400,"true"),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("note added",noteimpl.addNote(notedto,token),201,"true"),HttpStatus.CREATED);
 	}
 	
 	/**
@@ -47,10 +51,10 @@ public class NoteController {
 	 * @param token
 	 * @return display all the notes in response
 	 */
-	@GetMapping("/getallnotes/{token}")
-	public ResponseEntity<Response> getAllNotes(@PathVariable("token") String token)
+	@GetMapping("/getallnotes")
+	public List<NoteEntity> getAllNotes(@RequestHeader String token)
 	{
-		return new ResponseEntity<Response>(new Response("your notes are",noteimpl.getAllNotes(token),200),HttpStatus.OK);
+		return noteimpl.getAllNotesByTitle(token);
 	}
 	
 	/**
@@ -59,11 +63,11 @@ public class NoteController {
 	 * @param noteid
 	 * @return deleted note response
 	 */
-	@DeleteMapping("/deletenotes/{token}/{noteid}")
-	public ResponseEntity<Response> deleteNoteById(@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	@DeleteMapping("/deletenotes/{noteid}")
+	public ResponseEntity<Response> deleteNoteById(@RequestHeader String token,@PathVariable("noteid") long noteid)
 	{
 		noteimpl.deleteNoteById(token,noteid);
-		return new ResponseEntity<Response>(new Response("note was deleted",null,200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("note was deleted",null,200,"true"),HttpStatus.OK);
 	}
 	
 	/**
@@ -71,11 +75,11 @@ public class NoteController {
 	 * @param token
 	 * @return deleted all notes
 	 */
-	@DeleteMapping("/deleteallnotes/{token}")
-	public ResponseEntity<Response> deleteAllNotes(@PathVariable("token") String token)
+	@DeleteMapping("/deleteallnotes")
+	public ResponseEntity<Response> deleteAllNotes(@RequestHeader String token)
 	{
 		noteimpl.deleteAllNotes(token);
-		return new ResponseEntity<Response>(new Response("all notes were deleted",null,200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("all notes were deleted",null,200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Update Note : used to update the note content
@@ -84,11 +88,11 @@ public class NoteController {
 	 * @param noteid
 	 * @return display updated note
 	 */
-	@PutMapping("/updatenote/{token}/{noteid}")
-	public ResponseEntity<Response> updateNote(@RequestBody UpdateNoteDto updatenotedto,@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	@PutMapping("/updatenote/{noteId}")
+	public ResponseEntity<Response> updateNote(@RequestBody UpdateNoteDto updatenotedto,@PathVariable("noteId") long noteId,@RequestHeader String token)
 	{
-		NoteEntity note=noteimpl.updateNote(token,noteid,updatenotedto);
-		return new ResponseEntity<Response>(new Response(note.getTitle()+"note was updated",note,200),HttpStatus.OK);
+		NoteEntity note=noteimpl.updateNote(token,noteId,updatenotedto);
+		return new ResponseEntity<Response>(new Response(note.getTitle()+"note was updated",note,200,"true"),HttpStatus.OK);
 	}
 	
 	/**
@@ -97,11 +101,11 @@ public class NoteController {
 	 * @param noteid
 	 * @return to display the note
 	 */
-	@PutMapping("/ispinnote/{token}/{noteid}")
-	public ResponseEntity<Response> isPinNote(@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	@PutMapping("/ispinnote/{noteid}")
+	public ResponseEntity<Response> isPinNote(@RequestHeader String token,@PathVariable("noteid") long noteid)
 	{
 		NoteEntity note=noteimpl.isPinNote(token,noteid);
-		return new ResponseEntity<Response>(new Response(note.getTitle()+" was pinned",note,200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response(note.getTitle()+" was pinned",note,200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Archieve Note : used to archieve the note
@@ -109,11 +113,11 @@ public class NoteController {
 	 * @param noteid
 	 * @return to display the note
 	 */
-	@PutMapping("/isarchieve/{token}/{noteid}")
-	public ResponseEntity<Response> isArchieve(@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	@PutMapping("/isarchieve/{noteid}")
+	public ResponseEntity<Response> isArchieve(@RequestHeader String token,@PathVariable("noteid") long noteid)
 	{
 		NoteEntity note=noteimpl.isArchieveNote(token,noteid);
-		return new ResponseEntity<Response>(new Response(note.getTitle()+" was archieved",note,200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response(note.getTitle()+" was archieved",note,200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Trash Note : used to store note in trash
@@ -121,11 +125,12 @@ public class NoteController {
 	 * @param noteid
 	 * @return to display the note
 	 */
-	@PutMapping("/istrashed/{token}/{noteid}")
-	public ResponseEntity<Response> isTrashed(@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	@PutMapping("/istrashed/{noteid}")
+	public ResponseEntity<Response> isTrashed(@RequestHeader String token,@PathVariable("noteid") long noteid)
 	{
+		System.out.println();
 		NoteEntity note=noteimpl.isTrashed(token,noteid);
-		return new ResponseEntity<Response>(new Response(note.getTitle()+" was trashed",note,200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response(note.getTitle()+" was trashed",note,200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Remind Me : used to set reminder
@@ -133,31 +138,44 @@ public class NoteController {
 	 * @param noteid
 	 * @return remind response
 	 */
-	@PutMapping("/remindme/{token}/{noteid}")
-	public ResponseEntity<Response> remindMe(@RequestBody LocalDateTime reminderDate,@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	@PutMapping("/remindme/{noteid}")
+	public ResponseEntity<Response> remindMe(@RequestBody LocalDateTime reminderDate,@RequestHeader String token,@PathVariable("noteid") long noteid,BindingResult result)
 	{
+
+		if(result.hasErrors())
+		return new ResponseEntity<Response>(new Response("invalid details",null,400,"true"),HttpStatus.BAD_REQUEST);
 		NoteEntity note=noteimpl.remindMe(token,noteid,reminderDate);
-		return new ResponseEntity<Response>(new Response(note.getReminde()+" was set",note,200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response(note.getReminde()+" was set",note,200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Get All Pin-Notes : used to get all pinned notes
 	 * @param token
 	 * @return pinned notes
 	 */
-	@GetMapping("/getallpins/{token}")
-	public ResponseEntity<Response> getAllPinNotes(@PathVariable("token") String token)
+	@GetMapping("/getallpins")
+	public ResponseEntity<Response> getAllPinNotes(@RequestHeader String token)
 	{
-		return new ResponseEntity<Response>(new Response("your notes are",noteimpl.getAllPinNotes(token),200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("your notes are",noteimpl.getAllPinNotes(token),200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Get All Archieve-Notes : used to get all archieved notes
 	 * @param token
 	 * @return archieved notes
 	 */
-	@GetMapping("/getallarchieves/{token}")
-	public ResponseEntity<Response> getAllArchieveNotes(@PathVariable("token") String token)
+	@GetMapping("/getallarchieves")
+	public ResponseEntity<Response> getAllArchieveNotes(@RequestHeader String token)
 	{
-		return new ResponseEntity<Response>(new Response("your notes are",noteimpl.getAllArchieveNotes(token),200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("your notes are",noteimpl.getAllArchieveNotes(token),200,"true"),HttpStatus.OK);
+	}
+	/**
+	 * 
+	 * @param token
+	 * @return
+	 */
+	@GetMapping("/getalltrashnotes")
+	public ResponseEntity<Response> getAllTrashedNotes(@RequestHeader String token)
+	{
+		return new ResponseEntity<Response>(new Response("your notes are",noteimpl.getAllTrashedNotes(token),200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Get Note By Id : used to get a note based upon id value
@@ -165,28 +183,36 @@ public class NoteController {
 	 * @param noteid
 	 * @return single note response
 	 */
-	@GetMapping("/getnotebyid/{token}/{noteid}")
-	public ResponseEntity<Response> getNoteById(@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	@GetMapping("/getnotebyid/{noteid}")
+	public ResponseEntity<Response> getNoteById(@RequestHeader String token,@PathVariable("noteid") long noteid)
 	{
-		return new ResponseEntity<Response>(new Response("your note is",noteimpl.getNoteById(token,noteid),200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("your note is",noteimpl.getNoteById(token,noteid),200,"true"),HttpStatus.OK);
 	}
 	
-	@PutMapping("/updateremindeme/{token}/{noteid}")
-	public ResponseEntity<Response> updateRemindMe(@RequestBody LocalDateTime remindme,@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	@PutMapping("/updateremindeme/{noteid}")
+	public ResponseEntity<Response> updateRemindMe(@RequestBody LocalDateTime remindme,@RequestHeader String token,@PathVariable("noteid") long noteid,BindingResult result)
 	{
-		return new ResponseEntity<Response>(new Response("remindme is updated",noteimpl.UpdateRemindMe(remindme,token,noteid),200),HttpStatus.OK);
+
+		if(result.hasErrors())
+		return new ResponseEntity<Response>(new Response("invalid details",null,400,"true"),HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<Response>(new Response("remindme is updated",noteimpl.UpdateRemindMe(remindme,token,noteid),200,"true"),HttpStatus.OK);
 	}
 	
-	@DeleteMapping("/deleteremindeme/{token}/{noteid}")
-	public ResponseEntity<Response> delteRemindMe(@PathVariable("token") String token,@PathVariable("noteid") long noteid)
+	@DeleteMapping("/deleteremindeme/{noteid}")
+	public ResponseEntity<Response> delteRemindMe(@RequestHeader String token,@PathVariable("noteid") long noteid)
 	{
 		noteimpl.deleteRemindMe(token,noteid);
-		return new ResponseEntity<Response>(new Response("remindme is deleted",null,200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("remindme is deleted",null,200,"true"),HttpStatus.OK);
 	}
 		
-	@GetMapping("/allnotesbytitle/{token}")
-	public ResponseEntity<Response> getAllNotesByTitle(@PathVariable("token") String token)
+	@GetMapping("/allnotesbytitle")
+	public ResponseEntity<Response> getAllNotesByTitle(@RequestHeader String token)
 	{
-		return new ResponseEntity<Response>(new Response("your notes are",noteimpl.getAllNotesByTitle(token),200),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("your notes are",noteimpl.getAllNotesByTitle(token),200,"true"),HttpStatus.OK);
+	}
+	@PutMapping("/changecolor/{noteid}")
+	public ResponseEntity<Response> changeNoteColor(@RequestBody String color,@RequestHeader String token,@PathVariable("noteid") long noteid)
+	{
+		return new ResponseEntity<Response>(new Response("note color updared",noteimpl.changeNoteColor(color,token,noteid),200,"true"),HttpStatus.OK);
 	}
 }

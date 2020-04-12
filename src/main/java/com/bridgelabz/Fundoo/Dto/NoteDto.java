@@ -6,6 +6,5 @@ import lombok.Data;
 public class NoteDto {
 	private String title;
 	private String description;
-	private String color;
 
 }

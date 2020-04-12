@@ -14,11 +14,13 @@ public class Response {
 	String message;
 	int status;
 	Object data;
-		public Response(String message,Object user,int status) 
+	String statusMsg;
+		public Response(String message,Object user,int status,String statusMsg) 
 		{
 		this.message=message;
 		this.status=status;
 		this.data=user;
+		this.statusMsg=statusMsg;
 		}
 	
 	

@@ -9,13 +9,13 @@ import com.bridgelabz.Fundoo.Entity.NoteEntity;
 public interface LabelServiceInf {
 	LabelEntity createLabel(LabelDto labeldto, String token);
 
-	LabelEntity addNoteToLabel(long noteid, String token,long labelid);
+	LabelEntity addNoteToLabel(Long noteid, String token,Long labelid);
 
-	LabelEntity getLabelById(long labelid);
-
-	LabelEntity updateLabel(LabelDto labeldto, String token, long labelid);
-
-	void deleteLabel(String token, long labelid);
+	LabelEntity updateLabel(LabelDto labeldto, String token, Long labelid);
 
 	List<LabelEntity> getAllLabels(String token);
+
+	void deleteLabel(String token, Long labelid);
+
+	LabelEntity getLabelById(Long labelid);
 }

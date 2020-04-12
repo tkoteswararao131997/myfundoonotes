@@ -8,6 +8,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.bridgelabz.Fundoo.Dto.LabelDto;
 import com.bridgelabz.Fundoo.Entity.LabelEntity;
@@ -21,6 +22,7 @@ import com.bridgelabz.Fundoo.Service.LabelServiceInf;
 import com.bridgelabz.Fundoo.Utility.JwtOperations;
 
 @Service
+@CrossOrigin("*")
 public class LabelServiceImpl implements LabelServiceInf 
 {
 	@Autowired
@@ -52,10 +54,10 @@ public class LabelServiceImpl implements LabelServiceInf
 	}
 	private void isLabelExists(String labelName) {
 		if(labelrepo.isLabelExists(labelName).isPresent())
-			throw new CustomException("label already exists",HttpStatus.NOT_ACCEPTABLE,null);	
+			throw new CustomException("label already exists",HttpStatus.NOT_ACCEPTABLE,null,"false");	
 	}
 	@Override
-	public LabelEntity addNoteToLabel(long noteid, String token, long labelid) {
+	public LabelEntity addNoteToLabel(Long noteid, String token, Long labelid) {
 		long userid=jwt.parseJWT(token);
 		UserEntity user=userimpl.getUserById(userid);
 		NoteEntity note=noteimpl.getNoteById(noteid, userid);
@@ -66,12 +68,13 @@ public class LabelServiceImpl implements LabelServiceInf
 	}
 	
 	@Override
-	public LabelEntity getLabelById(long labelid)
+	public LabelEntity getLabelById(Long labelid)
 	{
-		return labelrepo.getLabelById(labelid).orElseThrow(() -> new CustomException("no label is present",HttpStatus.NOT_FOUND,null));
+		System.out.println();
+		return labelrepo.getLabelById(labelid).orElseThrow(() -> new CustomException("no label is present",HttpStatus.NOT_ACCEPTABLE,null,"false"));
 	}
 	@Override
-	public LabelEntity updateLabel(LabelDto labeldto, String token, long labelid) {
+	public LabelEntity updateLabel(LabelDto labeldto, String token, Long labelid) {
 		long userid=jwt.parseJWT(token);
 		UserEntity user=userimpl.getUserById(userid);
 		LabelEntity label=getLabelById(labelid);
@@ -81,12 +84,14 @@ public class LabelServiceImpl implements LabelServiceInf
 		return getLabelById(label.getLabelId());
 	}
 	@Override
-	public void deleteLabel(String token, long labelid) {
-		long userid=jwt.parseJWT(token);
+	public void deleteLabel(String token, Long labelid) {
+		Long userid=jwt.parseJWT(token);
 		UserEntity user=userimpl.getUserById(userid);
 		LabelEntity label=getLabelById(labelid);
 		labelrepo.setcheck();
+		labelrepo.deleteLabelFromNote(labelid);
 		labelrepo.deleteLabel(labelid);
+		
 //		user.getNotes().remove(label);
 //		userrepo.save(user);
 		
@@ -94,17 +99,25 @@ public class LabelServiceImpl implements LabelServiceInf
 	@Override
 	public List<LabelEntity> getAllLabels(String token) {
 		
-		return labelrepo.getAllLabels(jwt.parseJWT(token)).orElseThrow(() -> new CustomException("no labels found",HttpStatus.NOT_FOUND,null));
+		return labelrepo.getAllLabels(jwt.parseJWT(token)).orElseThrow(() -> new CustomException("no labels found",HttpStatus.NOT_ACCEPTABLE,null,"false"));
 	}
-	public void deleteLabelFromNote(String token, long labelid, long noteid) {
+	public void deleteLabelFromNote(String token, Long labelid, Long noteid) {
 		long userid=jwt.parseJWT(token);
 		UserEntity user=userimpl.getUserById(userid);
 		NoteEntity note=noteimpl.getNoteById(noteid, userid);
-		LabelEntity label=labelrepo.getLabelById(labelid).orElseThrow(() -> new CustomException("no label is present",HttpStatus.NOT_FOUND,null));
-		int id=labelrepo.islabelwithnote(label.getLabelId(),note.getNoteId()).orElseThrow(() -> new CustomException("label not present",HttpStatus.NOT_FOUND,null));
+		LabelEntity label=labelrepo.getLabelById(labelid).orElseThrow(() -> new CustomException("no label is present",HttpStatus.NOT_ACCEPTABLE,null,"false"));
+		int id=labelrepo.islabelwithnote(label.getLabelId(),note.getNoteId()).orElseThrow(() -> new CustomException("label not present",HttpStatus.OK,null,"false"));
 		System.out.println(id);
 		note.getLabels().remove(label);
 		noterepo.save(note);
+	}
+	public List<NoteEntity> getnotesfromlabel(String token, Long labelid) {
+		long userid=jwt.parseJWT(token);
+		UserEntity user=userimpl.getUserById(userid);
+		LabelEntity label=labelrepo.getLabelById(labelid).orElseThrow(() -> new CustomException("no label is present",HttpStatus.NOT_ACCEPTABLE,null,"false"));
+		List<NoteEntity> notelist=label.getNotes();
+//		List<NoteEntity> notelist=labelrepo.getnotesfromlabel(labelid);
+		return notelist;
 	}
 	
 
