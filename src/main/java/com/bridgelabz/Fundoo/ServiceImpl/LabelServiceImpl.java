@@ -54,7 +54,7 @@ public class LabelServiceImpl implements LabelServiceInf
 	}
 	private void isLabelExists(String labelName) {
 		if(labelrepo.isLabelExists(labelName).isPresent())
-			throw new CustomException("label already exists",HttpStatus.NOT_ACCEPTABLE,null,"false");	
+			throw new CustomException("label already exists",HttpStatus.OK,null,"false");	
 	}
 	@Override
 	public LabelEntity addNoteToLabel(Long noteid, String token, Long labelid) {
@@ -62,6 +62,10 @@ public class LabelServiceImpl implements LabelServiceInf
 		UserEntity user=userimpl.getUserById(userid);
 		NoteEntity note=noteimpl.getNoteById(noteid, userid);
 		LabelEntity label=getLabelById(labelid);
+		boolean present=labelrepo.islabelwithnote(labelid, noteid).isPresent();
+		System.out.println(present);
+		if(present==true)
+			throw new CustomException("label already exists",HttpStatus.OK,null,"false");	
 		note.getLabels().add(label);
 		noterepo.save(note);
 		return label;
@@ -71,7 +75,7 @@ public class LabelServiceImpl implements LabelServiceInf
 	public LabelEntity getLabelById(Long labelid)
 	{
 		System.out.println();
-		return labelrepo.getLabelById(labelid).orElseThrow(() -> new CustomException("no label is present",HttpStatus.NOT_ACCEPTABLE,null,"false"));
+		return labelrepo.getLabelById(labelid).orElseThrow(() -> new CustomException("no label is present",HttpStatus.OK,null,"false"));
 	}
 	@Override
 	public LabelEntity updateLabel(LabelDto labeldto, String token, Long labelid) {
@@ -99,13 +103,13 @@ public class LabelServiceImpl implements LabelServiceInf
 	@Override
 	public List<LabelEntity> getAllLabels(String token) {
 		
-		return labelrepo.getAllLabels(jwt.parseJWT(token)).orElseThrow(() -> new CustomException("no labels found",HttpStatus.NOT_ACCEPTABLE,null,"false"));
+		return labelrepo.getAllLabels(jwt.parseJWT(token)).orElseThrow(() -> new CustomException("no labels found",HttpStatus.OK,null,"false"));
 	}
 	public void deleteLabelFromNote(String token, Long labelid, Long noteid) {
 		long userid=jwt.parseJWT(token);
 		UserEntity user=userimpl.getUserById(userid);
 		NoteEntity note=noteimpl.getNoteById(noteid, userid);
-		LabelEntity label=labelrepo.getLabelById(labelid).orElseThrow(() -> new CustomException("no label is present",HttpStatus.NOT_ACCEPTABLE,null,"false"));
+		LabelEntity label=labelrepo.getLabelById(labelid).orElseThrow(() -> new CustomException("no label is present",HttpStatus.OK,null,"false"));
 		int id=labelrepo.islabelwithnote(label.getLabelId(),note.getNoteId()).orElseThrow(() -> new CustomException("label not present",HttpStatus.OK,null,"false"));
 		System.out.println(id);
 		note.getLabels().remove(label);
@@ -114,10 +118,14 @@ public class LabelServiceImpl implements LabelServiceInf
 	public List<NoteEntity> getnotesfromlabel(String token, Long labelid) {
 		long userid=jwt.parseJWT(token);
 		UserEntity user=userimpl.getUserById(userid);
-		LabelEntity label=labelrepo.getLabelById(labelid).orElseThrow(() -> new CustomException("no label is present",HttpStatus.NOT_ACCEPTABLE,null,"false"));
+		LabelEntity label=labelrepo.getLabelById(labelid).orElseThrow(() -> new CustomException("no label is present",HttpStatus.OK,null,"false"));
 		List<NoteEntity> notelist=label.getNotes();
 //		List<NoteEntity> notelist=labelrepo.getnotesfromlabel(labelid);
 		return notelist;
+	}
+	public void isnoteinlabel(Long noteId,Long labelId)
+	{
+		labelrepo.isnoteinlabel(noteId,labelId);
 	}
 	
 

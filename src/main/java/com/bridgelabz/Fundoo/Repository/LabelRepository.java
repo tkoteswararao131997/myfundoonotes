@@ -38,6 +38,8 @@ public interface LabelRepository extends JpaRepository<LabelEntity, String> {
 	@Transactional
 	@Query(value="delete from labels where label_id=?1",nativeQuery = true)
 	void deleteLabel(Long labelId);
+	@Query(value = "select notes_note_id from notes_labels where notes_labels.labels_label_id=?2 and notes_labels.notes_note_id",nativeQuery = true)
+	Optional<Integer> isnoteinlabel(Long noteId,Long labelId);
 	
 //	@Query(value = "")
 //	List<NoteEntity> getnotesfromlabel(String labelid);
