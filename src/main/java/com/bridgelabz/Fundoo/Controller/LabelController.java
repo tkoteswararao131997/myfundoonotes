@@ -48,7 +48,7 @@ public class LabelController {
 	@PutMapping("/addlabeltonote/{noteid}/{labelid}")
 	public ResponseEntity<Response> addNoteToLabel(@PathVariable("noteid") Long noteid,@RequestHeader String token,@PathVariable Long labelid)
 	{
-		return new ResponseEntity<Response>(new Response("label added",labelimpl.addNoteToLabel(noteid,token,labelid),200,"true"),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("label added to note",labelimpl.addNoteToLabel(noteid,token,labelid),200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Update Label : used to update the label
@@ -94,7 +94,11 @@ public class LabelController {
 	public ResponseEntity<Response> getNotesFromLabel(@RequestHeader String token,@PathVariable("labelid") Long labelid)
 	{
 		List<NoteEntity> notelist=labelimpl.getnotesfromlabel(token,labelid);
-		return new ResponseEntity<Response>(new Response("notes are",notelist,200,"true"),HttpStatus.OK);
-
+		return new ResponseEntity<Response>(new Response("label notes are",notelist,200,"true"),HttpStatus.OK);
+	}
+	@PostMapping("/createlabeladdnote/{noteid}")
+	public ResponseEntity<Response> createLabelAddNote(@RequestHeader String token,@RequestBody LabelDto labeldto,@PathVariable("noteid") Long noteid)
+	{
+		return new ResponseEntity<Response>(new Response("label created and added",labelimpl.createLabelAddNote(token,labeldto,noteid),200,"true"),HttpStatus.OK);
 	}
 }

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.ws.rs.Path;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -139,7 +140,7 @@ public class NoteController {
 	 * @return remind response
 	 */
 	@PutMapping("/remindme/{noteid}")
-	public ResponseEntity<Response> remindMe(@RequestBody LocalDateTime reminderDate,@RequestHeader String token,@PathVariable("noteid") long noteid,BindingResult result)
+	public ResponseEntity<Response> remindMe(@RequestBody String reminderDate,@RequestHeader String token,@PathVariable("noteid") long noteid,BindingResult result)
 	{
 
 		if(result.hasErrors())
@@ -155,7 +156,7 @@ public class NoteController {
 	@GetMapping("/getallpins")
 	public ResponseEntity<Response> getAllPinNotes(@RequestHeader String token)
 	{
-		return new ResponseEntity<Response>(new Response("your notes are",noteimpl.getAllPinNotes(token),200,"true"),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("your pinned notes are",noteimpl.getAllPinNotes(token),200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Get All Archieve-Notes : used to get all archieved notes
@@ -165,7 +166,13 @@ public class NoteController {
 	@GetMapping("/getallarchieves")
 	public ResponseEntity<Response> getAllArchieveNotes(@RequestHeader String token)
 	{
-		return new ResponseEntity<Response>(new Response("your notes are",noteimpl.getAllArchieveNotes(token),200,"true"),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("your archieve notes are",noteimpl.getAllArchieveNotes(token),200,"true"),HttpStatus.OK);
+	}
+	
+	@GetMapping("/getremindernotes")
+	public ResponseEntity<Response> getReminderNotes(@RequestHeader String token)
+	{
+		return new ResponseEntity<Response>(new Response("reminder notes",noteimpl.getReminderNotes(token),200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * 
@@ -175,7 +182,7 @@ public class NoteController {
 	@GetMapping("/getalltrashnotes")
 	public ResponseEntity<Response> getAllTrashedNotes(@RequestHeader String token)
 	{
-		return new ResponseEntity<Response>(new Response("your notes are",noteimpl.getAllTrashedNotes(token),200,"true"),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("your trashed notes are",noteimpl.getAllTrashedNotes(token),200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Get Note By Id : used to get a note based upon id value
@@ -190,7 +197,7 @@ public class NoteController {
 	}
 	
 	@PutMapping("/updateremindeme/{noteid}")
-	public ResponseEntity<Response> updateRemindMe(@RequestBody LocalDateTime remindme,@RequestHeader String token,@PathVariable("noteid") long noteid,BindingResult result)
+	public ResponseEntity<Response> updateRemindMe(@RequestBody String remindme,@RequestHeader String token,@PathVariable("noteid") long noteid,BindingResult result)
 	{
 
 		if(result.hasErrors())
@@ -214,5 +221,16 @@ public class NoteController {
 	public ResponseEntity<Response> changeNoteColor(@RequestBody String color,@RequestHeader String token,@PathVariable("noteid") long noteid)
 	{
 		return new ResponseEntity<Response>(new Response("note color updared",noteimpl.changeNoteColor(color,token,noteid),200,"true"),HttpStatus.OK);
+	}
+	@GetMapping("/getlabelsfromnote/{noteid}")
+	public ResponseEntity<Response> getLabelsFromNote(@RequestHeader String token,@PathVariable("noteid") long noteid)
+	{
+		return new ResponseEntity<Response>(new Response("labels from note",noteimpl.getLabelsFromNote(token,noteid),200,"true"),HttpStatus.OK);
+	}
+	@PutMapping("/deletereminder/{noteid}")
+	public ResponseEntity<Response> deleteReminder(@RequestHeader String token,@PathVariable("noteid") Long noteid)
+	{
+		noteimpl.deleteReminder(token, noteid);
+		return new ResponseEntity<Response>(new Response("reminder deleted",null,200,"true"),HttpStatus.OK);
 	}
 }

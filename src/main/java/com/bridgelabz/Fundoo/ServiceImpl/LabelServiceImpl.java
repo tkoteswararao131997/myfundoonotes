@@ -127,6 +127,24 @@ public class LabelServiceImpl implements LabelServiceInf
 	{
 		labelrepo.isnoteinlabel(noteId,labelId);
 	}
+	public List<LabelEntity> createLabelAddNote(String token, LabelDto labeldto, Long noteid) {
+		long userid=jwt.parseJWT(token);
+		UserEntity user=userimpl.getUserById(userid);
+		NoteEntity note=noteimpl.getNoteById(noteid, userid);
+		isLabelExists(labeldto.getLabelName());
+		labelentity.setLabelName(labeldto.getLabelName());
+		labelentity.setCreateDate(LocalDateTime.now());
+		labelentity.setUpdateDate(LocalDateTime.now());
+		user.getLabels().add(labelentity);
+		userrepo.save(user);
+		List<LabelEntity> labels=user.getLabels();
+		for(LabelEntity label : labels)
+		{
+			if(labeldto.getLabelName().equals(label.getLabelName()))
+					addNoteToLabel(noteid, token, label.getLabelId());
+		}
+		return note.getLabels();
+	}
 	
 
 }

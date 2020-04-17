@@ -24,6 +24,6 @@ public interface NoteServiceInf {
 	NoteEntity isArchieveNote(String token, long noteid);
 
 	NoteEntity isTrashed(String token, long noteid);
-
-	NoteEntity remindMe(String token, long noteid,LocalDateTime reminderDate);
+	
+	NoteEntity remindMe(String token, long noteid, String reminderDate);
 }

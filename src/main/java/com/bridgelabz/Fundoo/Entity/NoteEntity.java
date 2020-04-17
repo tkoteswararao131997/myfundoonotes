@@ -30,7 +30,7 @@ public class NoteEntity implements Comparable<NoteEntity>{
 	private String description;
 	private String color;
 	private boolean isPinned;
-	private LocalDateTime reminde;
+	private String reminde;
 	private boolean isArchieve;
 	private LocalDateTime createDate;
 	private LocalDateTime UpdateDate;

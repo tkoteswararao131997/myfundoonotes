@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.bridgelabz.Fundoo.Dto.NoteDto;
-import com.bridgelabz.Fundoo.Dto.UpdateNoteDto;
+import com.bridgelabz.Fundoo.Dto.UpdateNoteDto;import com.bridgelabz.Fundoo.Entity.LabelEntity;
 import com.bridgelabz.Fundoo.Entity.NoteEntity;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
 import com.bridgelabz.Fundoo.Exception.CustomException;
@@ -143,7 +143,7 @@ public class NoteServiceImpl implements NoteServiceInf {
 		return note;
 	}
 	@Override
-	public NoteEntity remindMe(String token, long noteid,LocalDateTime reminderDate) {
+	public NoteEntity remindMe(String token, long noteid,String reminderDate) {
 		long userid= jwt.parseJWT(token);
 		userimpl.getUserById(userid);
 		NoteEntity note=getNoteById(noteid, userid);
@@ -164,11 +164,18 @@ public class NoteServiceImpl implements NoteServiceInf {
 		List<NoteEntity> archieveNotes=notes.stream().filter(archieve -> archieve.isArchieve()==true).collect(Collectors.toList());		
 		return archieveNotes;
 	}
+	public List<NoteEntity> getReminderNotes(String token) {
+		long userid=jwt.parseJWT(token);
+		userentity=userimpl.getUserById(userid);
+		List<NoteEntity> notes=noterepo.getAllNotes(userid).orElseThrow(null);
+		List<NoteEntity> ReminderNotes=notes.stream().filter(reminder -> reminder.getReminde()!=null).collect(Collectors.toList());		
+		return ReminderNotes;
+	}
 	public NoteEntity getNoteById(String token, long noteid) {
 		long userid=jwt.parseJWT(token);
 		return noterepo.getNoteById(noteid, userid).orElseThrow(() -> new CustomException("no notes in the list",HttpStatus.OK,null,"false"));
 	}
-	public NoteEntity UpdateRemindMe(LocalDateTime remindme, String token, long noteid) {
+	public NoteEntity UpdateRemindMe(String remindme, String token, long noteid) {
 		long userid=jwt.parseJWT(token);
 		userentity=userimpl.getUserById(userid);
 		NoteEntity note=getNoteById(noteid, userid);
@@ -192,6 +199,7 @@ public class NoteServiceImpl implements NoteServiceInf {
 	}
 	public List<NoteEntity> getAllTrashedNotes(String token) {
 		long id=jwt.parseJWT(token);
+		userentity=userimpl.getUserById(id);
 		List<NoteEntity> notes=noterepo.getAllNotes(id).orElseThrow(null);
 		List<NoteEntity> pinNotes=notes.stream().filter(archieve -> archieve.isTrashed()==true).collect(Collectors.toList());		
 		return pinNotes;
@@ -204,6 +212,20 @@ public class NoteServiceImpl implements NoteServiceInf {
 		noterepo.save(note);
 		return note;
 	}
+	public Object getLabelsFromNote(String token, long noteid) {
+		long userid=jwt.parseJWT(token);
+		userentity=userimpl.getUserById(userid);
+		NoteEntity note=getNoteById(noteid, userid);
+		return note.getLabels();
+	}
+	public void deleteReminder(String token,Long noteid) {
+		long userid=jwt.parseJWT(token);
+		userentity=userimpl.getUserById(userid);
+		NoteEntity note=getNoteById(noteid, userid);
+		note.setReminde(null);
+		noterepo.save(note);
+	}
+	
 	
 
 }
