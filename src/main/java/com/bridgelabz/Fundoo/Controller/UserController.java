@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -30,6 +31,8 @@ import com.bridgelabz.Fundoo.Response.Response;
 import com.bridgelabz.Fundoo.Service.AmazonS3ClientService;
 import com.bridgelabz.Fundoo.ServiceImpl.UserServiceImpl;
 
+import lombok.extern.java.Log;
+
 @RestController
 @CrossOrigin("*") 
 public class UserController {
@@ -43,6 +46,7 @@ public class UserController {
 	 * @param dto
 	 * @return register response
 	 */
+	
 	@PostMapping("/registeruser")
 	@ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<Response> registerUser(@RequestBody UserDto dto,BindingResult result)
@@ -58,7 +62,7 @@ public class UserController {
 	 * @param email,password
 	 * @return login response
 	 */
-	
+	//@Cacheable(value = "token", key = "#token")
 	@PostMapping("/loginuser")
 	public ResponseEntity<Response> loginUser(@RequestBody LoginDto dto,BindingResult result)
 	{
@@ -66,6 +70,7 @@ public class UserController {
 		if(result.hasErrors())
 		return new ResponseEntity<Response>(new Response("invalid details",null,400,"true"),HttpStatus.BAD_REQUEST);
 		String token=userimpl.loginUser(dto);
+		//System.out.println("Getting user with ID {}."+token);
 		return new ResponseEntity<Response>(new Response("login success",token,200,"true"),HttpStatus.OK);
 	}
 	/**
@@ -104,12 +109,11 @@ public class UserController {
 	 * @param userId
 	 * @return user
 	 */
+	//@Cacheable(value = "userId", key = "#userId")
 	@GetMapping("/getuserbyid/{userId}")
-	public ResponseEntity<Response> getuserById(@PathVariable("userId") long userId,BindingResult result)
+	public ResponseEntity<Response> getuserById(@PathVariable("userId") long userId)
 	{
-
-		if(result.hasErrors())
-		return new ResponseEntity<Response>(new Response("invalid details",null,400,"true"),HttpStatus.BAD_REQUEST);
+		//System.out.println("Getting user with ID {}."+userId);
 		return new ResponseEntity<Response>(new Response("welcome",userimpl.getUserById(userId),200,"true"),HttpStatus.OK);
 	}
 	/**

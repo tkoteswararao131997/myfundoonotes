@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bridgelabz.Fundoo.Dto.NoteDto;
 import com.bridgelabz.Fundoo.Dto.UpdateNoteDto;
 import com.bridgelabz.Fundoo.Entity.NoteEntity;
+//import com.bridgelabz.Fundoo.Repository.ElasticSearchRepoImpl;
 import com.bridgelabz.Fundoo.Response.Response;
+import com.bridgelabz.Fundoo.ServiceImpl.NoteSearchImpl;
 import com.bridgelabz.Fundoo.ServiceImpl.NoteServiceImpl;
 
 @RestController
@@ -31,6 +33,9 @@ import com.bridgelabz.Fundoo.ServiceImpl.NoteServiceImpl;
 public class NoteController {
 	@Autowired
 	private NoteServiceImpl noteimpl;
+	@Autowired
+	private NoteSearchImpl notesearchimpl;
+	
 	
 	/**
 	 * Add Note : used to add note to user
@@ -233,4 +238,10 @@ public class NoteController {
 		noteimpl.deleteReminder(token, noteid);
 		return new ResponseEntity<Response>(new Response("reminder deleted",null,200,"true"),HttpStatus.OK);
 	}
+	@GetMapping("/searchByTitle/{title}")
+	public ResponseEntity<Response> searchByTitle(@RequestHeader String token,@PathVariable("title") String title)
+	{
+		return new ResponseEntity<Response>(new Response("search notes are:",notesearchimpl.searchByTitle(title),200,"true"),HttpStatus.OK);
+	}
+	
 }

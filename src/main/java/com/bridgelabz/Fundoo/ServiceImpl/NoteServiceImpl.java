@@ -1,6 +1,8 @@
 package com.bridgelabz.Fundoo.ServiceImpl;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,7 +17,7 @@ import com.bridgelabz.Fundoo.Dto.UpdateNoteDto;import com.bridgelabz.Fundoo.Enti
 import com.bridgelabz.Fundoo.Entity.NoteEntity;
 import com.bridgelabz.Fundoo.Entity.UserEntity;
 import com.bridgelabz.Fundoo.Exception.CustomException;
-import com.bridgelabz.Fundoo.Repository.ElasticSearchRepository;
+//import com.bridgelabz.Fundoo.Repository.ElasticSearchRepository;
 import com.bridgelabz.Fundoo.Repository.NoteRepository;
 import com.bridgelabz.Fundoo.Repository.UserRepository;
 import com.bridgelabz.Fundoo.Service.NoteServiceInf;
@@ -36,7 +38,7 @@ public class NoteServiceImpl implements NoteServiceInf {
 	@Autowired
 	private UserRepository userrepo;
 	@Autowired
-	ElasticSearchRepository elasticRepo;
+	NoteSearchImpl elasticRepo;
 	@Override
 	public NoteEntity addNote(NoteDto notedto, String token) {
 		System.out.println(token);
@@ -54,8 +56,22 @@ public class NoteServiceImpl implements NoteServiceInf {
 		noteentity.setTrashed(false);
 		userentity.getNotes().add(noteentity);
 		userrepo.save(userentity);
-		//elasticRepo.createNote(noteentity);
-		return noteentity;
+		List<NoteEntity> notes=userentity.getNotes();
+		for(NoteEntity note : notes)
+		{
+			if(note.getTitle().equals(notedto.getTitle()))
+			{
+			try {
+				elasticRepo.createNote(note);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return note;
+			}
+		}
+		return null;
+		
 	}
 	@Override
 	public List<NoteEntity> getAllNotes(String token) {
@@ -70,7 +86,13 @@ public class NoteServiceImpl implements NoteServiceInf {
 		userimpl.getUserById(userid);
 		NoteEntity note=getNoteById(noteid, userid);
 		noterepo.delete(note);
-		//elasticRepo.deleteNote(note);
+		String id=String.valueOf(noteid);
+		try {
+			elasticRepo.deleteNote(id);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public NoteEntity getNoteById(long noteid,long userid)
@@ -92,7 +114,12 @@ public class NoteServiceImpl implements NoteServiceInf {
 		NoteEntity note=getNoteById(noteid, userid);
 		BeanUtils.copyProperties(updatenotedto, note);
 		noterepo.save(note);
-		//elasticRepo.updateNote(note);
+		try {
+			elasticRepo.updateNote(note);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return note;
 	}
 	@Override
@@ -107,6 +134,12 @@ public class NoteServiceImpl implements NoteServiceInf {
 		note.setArchieve(false);
 		note.setTrashed(false);
 		noterepo.save(note);
+		try {
+			elasticRepo.updateNote(note);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return note;
 	}
 	@Override
@@ -125,6 +158,12 @@ public class NoteServiceImpl implements NoteServiceInf {
 		}
 		note.setTrashed(false);
 		noterepo.save(note);
+		try {
+			elasticRepo.updateNote(note);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return note;
 	}
 	@Override
@@ -140,6 +179,12 @@ public class NoteServiceImpl implements NoteServiceInf {
 		else
 			note.setTrashed(false);
 		noterepo.save(note);
+		try {
+			elasticRepo.updateNote(note);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return note;
 	}
 	@Override
@@ -181,6 +226,12 @@ public class NoteServiceImpl implements NoteServiceInf {
 		NoteEntity note=getNoteById(noteid, userid);
 		note.setReminde(remindme);
 		noterepo.save(note);
+		try {
+			elasticRepo.updateNote(note);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return note;
 	}
 	public void deleteRemindMe(String token, long noteid) {
@@ -188,6 +239,12 @@ public class NoteServiceImpl implements NoteServiceInf {
 		userentity=userimpl.getUserById(userid);
 		NoteEntity note=getNoteById(noteid, userid);
 		note.setReminde(null);
+		try {
+			elasticRepo.updateNote(note);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		noterepo.save(note);
 	}
 	public List<NoteEntity> getAllNotesByTitle(String token) {
@@ -210,6 +267,12 @@ public class NoteServiceImpl implements NoteServiceInf {
 		NoteEntity note=getNoteById(noteid, userid);
 		note.setColor(color);
 		noterepo.save(note);
+		try {
+			elasticRepo.updateNote(note);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return note;
 	}
 	public Object getLabelsFromNote(String token, long noteid) {
@@ -224,6 +287,26 @@ public class NoteServiceImpl implements NoteServiceInf {
 		NoteEntity note=getNoteById(noteid, userid);
 		note.setReminde(null);
 		noterepo.save(note);
+		try {
+			elasticRepo.updateNote(note);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public List<NoteEntity> searchByTitle(String token, String title) {
+		long id=jwt.parseJWT(token);
+		userentity=userimpl.getUserById(id);
+		List<NoteEntity> notes=userentity.getNotes();
+		List<NoteEntity> searchednotes=new ArrayList<>();
+		for(NoteEntity note : notes)
+		{
+			if(note.getTitle().contains(title))
+			{
+				searchednotes.add(note);
+			}
+		}
+		return searchednotes;
 	}
 	
 	

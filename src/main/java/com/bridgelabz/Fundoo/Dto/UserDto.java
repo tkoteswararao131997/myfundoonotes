@@ -3,6 +3,9 @@ import javax.persistence.Column;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+
+import org.springframework.data.elasticsearch.annotations.Document;
+
 import lombok.Data;
 @Data
 public class UserDto {
