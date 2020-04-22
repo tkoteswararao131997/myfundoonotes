@@ -111,10 +111,10 @@ public class UserController {
 	 */
 	//@Cacheable(value = "userId", key = "#userId")
 	@GetMapping("/getuserbyid/{userId}")
-	public ResponseEntity<Response> getuserById(@PathVariable("userId") long userId)
+	public ResponseEntity<Response> getuserById(@PathVariable("userId") long userId,boolean cacheable)
 	{
 		//System.out.println("Getting user with ID {}."+userId);
-		return new ResponseEntity<Response>(new Response("welcome",userimpl.getUserById(userId),200,"true"),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("welcome",userimpl.getUserById(userId,cacheable),200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Update Password : set new password for user

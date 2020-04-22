@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -78,6 +79,12 @@ public class UserServiceImpl implements UserServiceInf {
 		user.setVerifyEmail(true);
 		userrepo.save(user);
 		return user;
+	}
+	@Override
+	@Cacheable(value="twenty-second-cache", key = "'tokenInCache'+#token", 
+    condition = "#isCacheable != null && #isCacheable")
+	public UserEntity getUserById(long id, boolean cacheable) {
+		return userrepo.getUserById(id).orElseThrow(() -> new CustomException("user not exists",HttpStatus.OK,id,"false"));
 	}
 	@Override
 	public UserEntity getUserById(long id) {

@@ -20,5 +20,6 @@ public interface UserServiceInf {
 	String loginUser(LoginDto dto);
 	UserEntity updatepwd(UpdatePwdDto pwddto);
 	String forgotPwd(ForgotPwdDto forgotdto);
+	UserEntity getUserById(long id, boolean cacheable);
 
 }
