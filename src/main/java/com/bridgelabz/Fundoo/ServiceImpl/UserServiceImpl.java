@@ -49,14 +49,14 @@ public class UserServiceImpl implements UserServiceInf {
 		return entity;
 	}
 	@Override
-	public String loginUser(LoginDto dto) {
+	public UserEntity loginUser(LoginDto dto) {
 		UserEntity user=userrepo.getUserByEmail(dto.getEmail()).orElseThrow(() -> new CustomException("login failed",HttpStatus.OK,null,"false"));
 		boolean ispwd=pwdencoder.matches(dto.getPassword(),user.getPassword());
 		if(ispwd==false || user.isVerifyEmail()==false) {
 			throw new CustomException("login failed",HttpStatus.OK,null,"false");
 		} else {
 			String token=jwt.jwtToken(user.getUserid());
-			return token;
+			return user;
 			
 		}
 

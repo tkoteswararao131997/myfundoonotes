@@ -30,6 +30,7 @@ import com.bridgelabz.Fundoo.Entity.UserEntity;
 import com.bridgelabz.Fundoo.Response.Response;
 import com.bridgelabz.Fundoo.Service.AmazonS3ClientService;
 import com.bridgelabz.Fundoo.ServiceImpl.UserServiceImpl;
+import com.bridgelabz.Fundoo.Utility.JwtOperations;
 
 import lombok.extern.java.Log;
 
@@ -40,7 +41,8 @@ public class UserController {
 	private UserServiceImpl userimpl;
 	@Autowired
     private AmazonS3ClientService amazonS3ClientService;
-	
+	@Autowired
+	private JwtOperations jwt;
 	/**
 	 * Register User : used to register the user
 	 * @param dto
@@ -69,9 +71,9 @@ public class UserController {
 
 		if(result.hasErrors())
 		return new ResponseEntity<Response>(new Response("invalid details",null,400,"true"),HttpStatus.BAD_REQUEST);
-		String token=userimpl.loginUser(dto);
-		//System.out.println("Getting user with ID {}."+token);
-		return new ResponseEntity<Response>(new Response("login success",token,200,"true"),HttpStatus.OK);
+		UserEntity user=userimpl.loginUser(dto);
+		String token =jwt.jwtToken(user.getUserid());
+		return new ResponseEntity<Response>(new Response(token,userimpl.loginUser(dto),200,"true"),HttpStatus.OK);
 	}
 	/**
 	 * Get All Users: used to display all the users in the table
@@ -135,10 +137,10 @@ public class UserController {
 		return new ResponseEntity<Response>(new Response("password updated and sent to mail successfully","your new pwd is:"+userimpl.forgotPwd(forgotdto),200,"true"),HttpStatus.OK);
 	}
 	
-	@PostMapping
-    public Map<String, String> uploadFile(@RequestPart(value = "file") MultipartFile file)
+	@PostMapping("/uploadProfile/{token}")
+    public Map<String, String> uploadFile(@RequestPart(value = "file") MultipartFile file,@PathVariable("token") String token)
     {
-        this.amazonS3ClientService.uploadFileToS3Bucket(file, true);
+        this.amazonS3ClientService.uploadFileToS3Bucket(file, true,token);
 
         Map<String, String> response = new HashMap<>();
         response.put("message", "file [" + file.getOriginalFilename() + "] uploading request submitted successfully.");

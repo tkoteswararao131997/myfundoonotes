@@ -3,7 +3,10 @@ package com.bridgelabz.Fundoo.ServiceImpl;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.bridgelabz.Fundoo.Entity.UserEntity;
+import com.bridgelabz.Fundoo.Repository.UserRepository;
 import com.bridgelabz.Fundoo.Service.AmazonS3ClientService;
+import com.bridgelabz.Fundoo.Utility.JwtOperations;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +30,12 @@ public class AmazonS3ClientServiceImpl implements AmazonS3ClientService
 {
     private String awsS3AudioBucket;
     private AmazonS3 amazonS3;
+    @Autowired
+    private UserServiceImpl userimpl;
+    @Autowired
+    private JwtOperations jwt;
+    @Autowired
+    private UserRepository userrepo;
     private static final Logger logger = LoggerFactory.getLogger(AmazonS3ClientServiceImpl.class);
 
     @Autowired
@@ -37,12 +46,16 @@ public class AmazonS3ClientServiceImpl implements AmazonS3ClientService
                 .withRegion(awsRegion.getName()).build();
         this.awsS3AudioBucket = awsS3AudioBucket;
     }
-
+    @Override
     @Async
-    public void uploadFileToS3Bucket(MultipartFile multipartFile, boolean enablePublicReadAccess) 
+    public String uploadFileToS3Bucket(MultipartFile multipartFile, boolean enablePublicReadAccess,String token) 
     {
+    	Long userid=jwt.parseJWT(token);
+    	UserEntity user=userimpl.getUserById(userid);
         String fileName = multipartFile.getOriginalFilename();
-
+        System.out.println(multipartFile);
+        String profile="https://"+awsS3AudioBucket+".s3.ap-south-1.amazonaws.com/"+fileName;
+        user.setProfile(profile);
         try {
             //creating the file in the server (temporarily)
             File file = new File(fileName);
@@ -58,8 +71,11 @@ public class AmazonS3ClientServiceImpl implements AmazonS3ClientService
             this.amazonS3.putObject(putObjectRequest);
             //removing the file created in the server
             file.delete();
+            userrepo.save(user);
+            return user.getProfile();
         } catch (IOException | AmazonServiceException ex) {
             logger.error("error [" + ex.getMessage() + "] occurred while uploading [" + fileName + "] ");
+            return null;
         }
     }
 

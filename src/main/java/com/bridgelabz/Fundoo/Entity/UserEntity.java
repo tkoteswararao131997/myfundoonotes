@@ -41,7 +41,7 @@ public class UserEntity implements Serializable{
 	private LocalDateTime createDate;
 	private LocalDateTime updateDate;
 	private boolean isVerifyEmail=false;
-	
+	private String profile;
 	@OneToMany(cascade = {CascadeType.ALL},fetch = FetchType.LAZY)
 	@JoinColumn(name="userid")
 	private List<NoteEntity> notes;
