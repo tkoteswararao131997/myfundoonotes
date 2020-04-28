@@ -41,6 +41,7 @@ public class UserServiceImpl implements UserServiceInf {
 		entity.setCreateDate(LocalDateTime.now());
 		entity.setUpdateDate(LocalDateTime.now());
 		entity.setPassword(pwdencoder.encode(entity.getPassword()));
+		entity.setProfile("https://kevin5.s3.ap-south-1.amazonaws.com/commonprofile.png");
 		UserEntity res =userrepo.save(entity);
 		//log.info(entity.getName()+" registered "+"date:"+entity.getCreateDate());
 		String body="http://localhost:8080/verifyemail/"+jwt.jwtToken(entity.getUserid());
@@ -68,6 +69,7 @@ public class UserServiceImpl implements UserServiceInf {
 	}
 	@Override
 	public UserEntity getUserByEmail(String email) {
+		System.out.println(email);
 	UserEntity user=userrepo.getUserByEmail(email).orElseThrow(() -> new CustomException("email not exists",HttpStatus.OK,null,"false"));
 	return user;
 	}
@@ -88,6 +90,11 @@ public class UserServiceImpl implements UserServiceInf {
 	}
 	@Override
 	public UserEntity getUserById(long id) {
+		return userrepo.getUserById(id).orElseThrow(() -> new CustomException("user not exists",HttpStatus.OK,id,"false"));
+	}
+	
+	public UserEntity getUser(String token) {
+		long id=jwt.parseJWT(token);
 		return userrepo.getUserById(id).orElseThrow(() -> new CustomException("user not exists",HttpStatus.OK,id,"false"));
 	}
 	@Override

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -118,6 +119,14 @@ public class UserController {
 		//System.out.println("Getting user with ID {}."+userId);
 		return new ResponseEntity<Response>(new Response("welcome",userimpl.getUserById(userId,cacheable),200,"true"),HttpStatus.OK);
 	}
+	
+	@GetMapping("/getuser")
+	public ResponseEntity<Response> getuser(@RequestHeader String token)
+	{
+		 Long id=jwt.parseJWT(token);
+	     UserEntity user=userimpl.getUserById(id);
+		return new ResponseEntity<Response>(new Response("welcome",userimpl.getUser(token),200,"true"),HttpStatus.OK);
+	}
 	/**
 	 * Update Password : set new password for user
 	 * @param pwddto
@@ -137,15 +146,17 @@ public class UserController {
 		return new ResponseEntity<Response>(new Response("password updated and sent to mail successfully","your new pwd is:"+userimpl.forgotPwd(forgotdto),200,"true"),HttpStatus.OK);
 	}
 	
-	@PostMapping("/uploadProfile/{token}")
-    public Map<String, String> uploadFile(@RequestPart(value = "file") MultipartFile file,@PathVariable("token") String token)
+	@PostMapping("/uploadProfile")
+    public ResponseEntity<Response> uploadFile(@RequestPart(value = "file") MultipartFile file,@RequestHeader String token)
     {
         this.amazonS3ClientService.uploadFileToS3Bucket(file, true,token);
-
+        Long id=jwt.parseJWT(token);
+        UserEntity user=userimpl.getUserById(id);
         Map<String, String> response = new HashMap<>();
-        response.put("message", "file [" + file.getOriginalFilename() + "] uploading request submitted successfully.");
+        //response.put(user, "file [" + file.getOriginalFilename() + "] uploading request submitted successfully.");
 
-        return response;
+		return new ResponseEntity<Response>(new Response("file [" + file.getOriginalFilename() + "] uploading request submitted successfully.", user,200,"true"),HttpStatus.OK);
+
     }
 
     @DeleteMapping

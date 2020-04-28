@@ -33,24 +33,26 @@ public class CollaboratorServiceImpl implements CollaboratorService {
 	@Autowired
 	private CollaboratorRepository collabrepo;
 	@Override
-	public NoteEntity addColabToNote(CollaboratorDto colabDto, String token, long noteid) {
+	public NoteEntity addColabToNote(String colabEmail, String token, long noteid) {
 		long userid=jwt.parseJWT(token);
 		UserEntity user=userimpl.getUserById(userid);
-		if((user.getEmail().equals(colabDto.getColabEmail())))
+		if((user.getEmail().equals(colabEmail)))
 			throw new CustomException("u r the owner",HttpStatus.NOT_ACCEPTABLE,null,"false");
 		NoteEntity note=noteimpl.getNoteById(noteid, userid);
-		UserEntity colabuser=userimpl.getUserByEmail(colabDto.getColabEmail());
+		UserEntity colabuser=userimpl.getUserByEmail(colabEmail);
 		note.getCollaborators().add(colabuser);
 		noterepo.save(note);
 		return note;
 	}
 
 	@Override
-	public void deleteColabFromNote(CollaboratorDto colabdto, String token, long noteid) {
+	public void deleteColabFromNote(String colabEmail, String token, long noteid) {
 		long userid=jwt.parseJWT(token);
 		UserEntity user=userimpl.getUserById(userid);
+		System.out.println(colabEmail);
+		//UserEntity colab=userimpl.getUserById(colabEmail);
 		NoteEntity note=noteimpl.getNoteById(noteid, userid);
-		UserEntity colabuser=userimpl.getUserByEmail(colabdto.getColabEmail());
+		UserEntity colabuser=userimpl.getUserByEmail(colabEmail);
 		if(collabrepo.isColabInNote(colabuser.getUserid(),note.getNoteId()).isPresent())
 		{
 			note.getCollaborators().remove(colabuser);
