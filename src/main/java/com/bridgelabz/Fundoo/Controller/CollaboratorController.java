@@ -33,12 +33,18 @@ public class CollaboratorController {
 	{
 		System.out.println("in controller"+colabEmail);
 		colabimpl.deleteColabFromNote(colabEmail, token, noteid);
-		return new ResponseEntity<Response>(new Response("collaborator deleted",null,200,"true"),HttpStatus.OK);
+		return new ResponseEntity<Response>(new Response("collaborator deleted",colabEmail,200,"true"),HttpStatus.OK);
 	}
 	
 	@GetMapping("/getallcollaborators/{noteid}")
 	public ResponseEntity<Response> getAllCollaborators(@RequestHeader String token,@PathVariable("noteid") long noteid)
 	{
 		return new ResponseEntity<Response>(new Response("note collaborators are",colabimpl.getAllColabs(token, noteid),200,"true"),HttpStatus.OK);
+	}
+	@GetMapping("/getcollaborator/{colabEmail}")
+	public ResponseEntity<Response> getCollaborator(@PathVariable("colabEmail") String colabEmail,@RequestHeader String token)
+	{
+		return new ResponseEntity<Response>(new Response("collaborator is",colabimpl.getColab(token, colabEmail),200,"true"),HttpStatus.OK);
+
 	}
 }

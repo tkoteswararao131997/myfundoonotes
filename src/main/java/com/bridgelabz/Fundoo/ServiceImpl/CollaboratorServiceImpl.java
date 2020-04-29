@@ -33,7 +33,7 @@ public class CollaboratorServiceImpl implements CollaboratorService {
 	@Autowired
 	private CollaboratorRepository collabrepo;
 	@Override
-	public NoteEntity addColabToNote(String colabEmail, String token, long noteid) {
+	public UserEntity addColabToNote(String colabEmail, String token, long noteid) {
 		long userid=jwt.parseJWT(token);
 		UserEntity user=userimpl.getUserById(userid);
 		if((user.getEmail().equals(colabEmail)))
@@ -42,7 +42,7 @@ public class CollaboratorServiceImpl implements CollaboratorService {
 		UserEntity colabuser=userimpl.getUserByEmail(colabEmail);
 		note.getCollaborators().add(colabuser);
 		noterepo.save(note);
-		return note;
+		return colabuser;
 	}
 
 	@Override
@@ -70,6 +70,11 @@ public class CollaboratorServiceImpl implements CollaboratorService {
 		NoteEntity note=noteimpl.getNoteById(noteid, userid);
 		List<UserEntity> colabusers=note.getCollaborators();
 		return colabusers;
+	}
+
+	public UserEntity getColab(String token, String colabEmail) {
+		UserEntity user=userimpl.getUserByEmail(colabEmail);
+		return user;
 	}
 
 }
