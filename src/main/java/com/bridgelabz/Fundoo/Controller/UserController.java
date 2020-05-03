@@ -69,11 +69,12 @@ public class UserController {
 	@PostMapping("/loginuser")
 	public ResponseEntity<Response> loginUser(@RequestBody LoginDto dto,BindingResult result)
 	{
-
+		System.out.println("hitting");
 		if(result.hasErrors())
 		return new ResponseEntity<Response>(new Response("invalid details",null,400,"true"),HttpStatus.BAD_REQUEST);
 		UserEntity user=userimpl.loginUser(dto);
 		String token =jwt.jwtToken(user.getUserid());
+		System.out.println(token);
 		return new ResponseEntity<Response>(new Response(token,userimpl.loginUser(dto),200,"true"),HttpStatus.OK);
 	}
 	/**

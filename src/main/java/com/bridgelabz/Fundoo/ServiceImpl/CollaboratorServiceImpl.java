@@ -14,6 +14,7 @@ import com.bridgelabz.Fundoo.Entity.UserEntity;
 import com.bridgelabz.Fundoo.Exception.CustomException;
 import com.bridgelabz.Fundoo.Repository.CollaboratorRepository;
 import com.bridgelabz.Fundoo.Repository.NoteRepository;
+import com.bridgelabz.Fundoo.Repository.UserRepository;
 import com.bridgelabz.Fundoo.Service.CollaboratorService;
 import com.bridgelabz.Fundoo.Utility.JwtOperations;
 @Service
@@ -22,9 +23,10 @@ public class CollaboratorServiceImpl implements CollaboratorService {
 	@Autowired
 	private JwtOperations jwt;
 	
-	@Autowired
+	@Autowired 
 	private UserServiceImpl userimpl;
-	
+	@Autowired
+	private UserRepository userrepo;
 	@Autowired
 	private NoteServiceImpl noteimpl;
 	
@@ -41,7 +43,12 @@ public class CollaboratorServiceImpl implements CollaboratorService {
 		NoteEntity note=noteimpl.getNoteById(noteid, userid);
 		UserEntity colabuser=userimpl.getUserByEmail(colabEmail);
 		note.getCollaborators().add(colabuser);
+		user.getNotes().add(note);
+		userrepo.save(user);
+		//colabuser.getNotes().add(note);
 		noterepo.save(note);
+		//colabuser.getNotes().add(note);
+		//userrepo.save(colabuser);
 		return colabuser;
 	}
 

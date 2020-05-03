@@ -18,6 +18,7 @@ import com.bridgelabz.Fundoo.Entity.UserEntity;
 import com.bridgelabz.Fundoo.Exception.CustomException;
 import com.bridgelabz.Fundoo.Repository.UserRepository;
 import com.bridgelabz.Fundoo.Service.UserServiceInf;
+import com.bridgelabz.Fundoo.Utility.Jms;
 import com.bridgelabz.Fundoo.Utility.JwtOperations;
 
 @Service
@@ -29,6 +30,8 @@ public class UserServiceImpl implements UserServiceInf {
 	private BCryptPasswordEncoder pwdencoder;
 	@Autowired
 	private JwtOperations jwt=new JwtOperations();
+	@Autowired
+	private Jms jms;
 	//@Autowired
 	//private RabbitMQSender mailsender;
 	//public static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
@@ -45,7 +48,7 @@ public class UserServiceImpl implements UserServiceInf {
 		UserEntity res =userrepo.save(entity);
 		//log.info(entity.getName()+" registered "+"date:"+entity.getCreateDate());
 		String body="http://localhost:8080/verifyemail/"+jwt.jwtToken(entity.getUserid());
-		jwt.sendEmail(entity.getEmail(),"verification email",body);
+		jms.sendEmail(entity.getEmail(),"verification email",body);
 		//mailsender.sendMessage(new Notification(entity.getEmail(),"verification"));
 		return entity;
 	}
@@ -53,7 +56,7 @@ public class UserServiceImpl implements UserServiceInf {
 	public UserEntity loginUser(LoginDto dto) {
 		UserEntity user=userrepo.getUserByEmail(dto.getEmail()).orElseThrow(() -> new CustomException("login failed",HttpStatus.OK,null,"false"));
 		boolean ispwd=pwdencoder.matches(dto.getPassword(),user.getPassword());
-		if(ispwd==false || user.isVerifyEmail()==false) {
+		if(ispwd==false) {
 			throw new CustomException("login failed",HttpStatus.OK,null,"false");
 		} else {
 			String token=jwt.jwtToken(user.getUserid());
@@ -126,7 +129,7 @@ public class UserServiceImpl implements UserServiceInf {
 	public String forgotPwd(ForgotPwdDto forgotdto) {
 		UserEntity user=getUserByEmail(forgotdto.getEmail());
 		String body="http://localhost:4200/resetpassword/"+jwt.jwtToken(user.getUserid());
-		jwt.sendEmail(user.getEmail(),"Reset Password",body);
+		jms.sendEmail(user.getEmail(),"Reset Password",body);
 		return "success";
 	}
 	

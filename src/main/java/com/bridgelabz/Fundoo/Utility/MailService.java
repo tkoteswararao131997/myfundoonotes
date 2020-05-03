@@ -15,7 +15,5 @@ public class MailService implements Serializable {
 	private String consumerMail;
 	private String message;
 	private String body;
-	
-
 }
 
